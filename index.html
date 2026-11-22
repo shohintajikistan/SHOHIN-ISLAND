@@ -80,12 +80,32 @@ const s=.7+Math.random()*.9;dummy.position.set(x,y+2.4*s,z);dummy.rotation.y=Mat
 dummy.position.y=y+7*s;dummy.scale.set(s,s,s);dummy.updateMatrix();leaves.setMatrixAt(count,dummy.matrix);count++}
 trunks.count=count;leaves.count=count;scene.add(trunks,leaves);
 
-// Tropical palms and dense undergrowth
-const palmTrunkGeo=new THREE.CylinderGeometry(.22,.48,10,7),palmLeafGeo=new THREE.ConeGeometry(1.05,8,5);
-const palmTrunkMat=new THREE.MeshStandardMaterial({color:0x80603b,roughness:1}),palmLeafMat=new THREE.MeshStandardMaterial({color:0x2e8a4e,roughness:.9,side:THREE.DoubleSide});
-const palmTrunks=new THREE.InstancedMesh(palmTrunkGeo,palmTrunkMat,520),palmLeaves=new THREE.InstancedMesh(palmLeafGeo,palmLeafMat,520);let pc=0;
-for(let i=0;i<520;i++){const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<0||y>35||Math.hypot(x,z)>2240)continue;const sc=.7+Math.random()*.8;dummy.position.set(x,y+5*sc,z);dummy.rotation.z=(Math.random()-.5)*.13;dummy.rotation.x=(Math.random()-.5)*.13;dummy.scale.set(sc,sc,sc);dummy.updateMatrix();palmTrunks.setMatrixAt(pc,dummy.matrix);dummy.position.y=y+10*sc;dummy.rotation.set(Math.random()*.15,Math.random()*6,Math.random()*.15);dummy.scale.set(sc*1.5,sc,sc*1.5);dummy.updateMatrix();palmLeaves.setMatrixAt(pc,dummy.matrix);pc++}
-palmTrunks.count=pc;palmLeaves.count=pc;scene.add(palmTrunks,palmLeaves);
+// Tropical palms: curved trunks and individually shaped radial fronds, instanced for mobile performance.
+function makePalmFrond(){
+ const g=new THREE.BufferGeometry(),v=[],idx=[];
+ const rows=12,cols=4;
+ for(let i=0;i<=rows;i++){const t=i/rows,half=Math.sin(Math.PI*t)*.72*(1-.22*t);for(let j=0;j<=cols;j++){const u=j/cols*2-1;v.push(u*half,t*7.2,-t*t*1.35-Math.abs(u)*.12)}}
+ for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){const a=i*(cols+1)+j,b=a+1,c=a+cols+1,d=c+1;idx.push(a,c,b,b,c,d)}
+ g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();return g;
+}
+const palmTrunkGeo=new THREE.CylinderGeometry(.2,.48,10,8,5);
+const palmTrunkMat=new THREE.MeshStandardMaterial({color:0x80603b,roughness:1});
+const palmFrondGeo=makePalmFrond();
+const palmLeafMat=new THREE.MeshStandardMaterial({color:0x287c43,roughness:.88,side:THREE.DoubleSide});
+const PALM_COUNT=360,FRONDS=8;
+const palmTrunks=new THREE.InstancedMesh(palmTrunkGeo,palmTrunkMat,PALM_COUNT);
+const palmFronds=new THREE.InstancedMesh(palmFrondGeo,palmLeafMat,PALM_COUNT*FRONDS);
+palmTrunks.castShadow=true;palmFronds.castShadow=true;
+let pc=0;
+for(let i=0;i<PALM_COUNT;i++){
+ const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);
+ if(y<0||y>38||Math.hypot(x,z)>2240)continue;
+ const sc=.72+Math.random()*.72,lean=(Math.random()-.5)*.12;
+ dummy.position.set(x+lean*5,y+5*sc,z);dummy.rotation.set(lean,Math.random()*6.28,lean*.5);dummy.scale.set(sc,sc,sc);dummy.updateMatrix();palmTrunks.setMatrixAt(pc,dummy.matrix);
+ for(let k=0;k<FRONDS;k++){dummy.position.set(x+lean*10,y+9.6*sc,z);dummy.rotation.set(-.22+Math.random()*.12,k/FRONDS*Math.PI*2,Math.random()*.10-.05);dummy.scale.set(sc*(.92+Math.random()*.18),sc,sc);dummy.updateMatrix();palmFronds.setMatrixAt(pc*FRONDS+k,dummy.matrix)}
+ pc++;
+}
+palmTrunks.count=pc;palmFronds.count=pc*FRONDS;scene.add(palmTrunks,palmFronds);
 const bushGeo=new THREE.IcosahedronGeometry(1.8,1),bushMat=new THREE.MeshStandardMaterial({color:0x347442,roughness:1});
 const bushes=new THREE.InstancedMesh(bushGeo,bushMat,2400);let bc=0;
 for(let i=0;i<2400;i++){const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<3||y>110||Math.hypot(x,z)>2200)continue;const sc=.7+Math.random()*2;dummy.position.set(x,y+sc,z);dummy.rotation.set(Math.random(),Math.random()*6,Math.random());dummy.scale.set(sc*1.3,sc*.65,sc);dummy.updateMatrix();bushes.setMatrixAt(bc++,dummy.matrix)}
@@ -149,8 +169,15 @@ const pack=new THREE.Mesh(new THREE.BoxGeometry(1.5,2,1),new THREE.MeshStandardM
 let yaw=0,pitch=.18,third=true,overview=false,vy=0,onGround=true;const move={x:0,y:0};let last=performance.now();
 function updateCamera(){if(overview){const distance=5600,aspect=innerWidth/innerHeight;camera.fov=THREE.MathUtils.radToDeg(2*Math.atan(5600/(2*distance*Math.max(aspect,.35))));camera.fov=clamp(camera.fov,38,110);camera.position.set(0,distance,0);camera.up.set(0,0,-1);camera.lookAt(0,0,0);camera.updateProjectionMatrix();return}camera.fov=62;camera.up.set(0,1,0);camera.updateProjectionMatrix();const target=new THREE.Vector3(player.position.x,player.position.y+4.2,player.position.z);if(third){const dist=13;const offset=new THREE.Vector3(Math.sin(yaw)*dist,3.5+pitch*12,Math.cos(yaw)*dist);camera.position.copy(target).add(offset);camera.lookAt(target)}else{camera.position.set(player.position.x,player.position.y+5.35,player.position.z);const forward=new THREE.Vector3(-Math.sin(yaw),pitch*.22,-Math.cos(yaw));camera.lookAt(camera.position.clone().add(forward.multiplyScalar(30)))}}
 updateCamera();
+const introStarted=performance.now(),introDuration=3800;
+const introFrom=new THREE.Vector3(0,1450,1650),introLookFrom=new THREE.Vector3(0,0,0);
+camera.position.copy(introFrom);camera.lookAt(introLookFrom);
 function movePlayer(dt){const speed=32;const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const dir=forward.multiplyScalar(-move.y).add(right.multiplyScalar(move.x));if(dir.lengthSq()>1)dir.normalize();player.position.addScaledVector(dir,speed*dt);const ground=heightAt(player.position.x,player.position.z);vy-=32*dt;player.position.y+=vy*dt;if(player.position.y<=ground){player.position.y=ground;vy=0;onGround=true}if(dir.lengthSq()>.001)player.rotation.y=Math.atan2(dir.x,dir.z);updateCamera();document.getElementById('coords').textContent='X '+Math.round(player.position.x)+' м · Z '+Math.round(player.position.z)+' м'}
-function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.04);last=now;movePlayer(dt);sea.position.y=-2.8+Math.sin(now*.00045)*.12;waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
+function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.04);last=now;movePlayer(dt);
+ const introT=clamp((now-introStarted)/introDuration,0,1);
+ if(introT<1&&!overview){const e=introT*introT*(3-2*introT),target=new THREE.Vector3(player.position.x+Math.sin(yaw)*13,player.position.y+7.7+pitch*12,player.position.z+Math.cos(yaw)*13),look=new THREE.Vector3(player.position.x,player.position.y+4.2,player.position.z);camera.position.lerpVectors(introFrom,target,e);camera.lookAt(introLookFrom.clone().lerp(look,e))}
+ palmFronds.rotation.z=Math.sin(now*.0007)*.006;palmFronds.rotation.x=Math.cos(now*.00055)*.004;
+ sea.position.y=-2.8+Math.sin(now*.00045)*.12;waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
 requestAnimationFrame(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);updateCamera()});
 const stick=document.getElementById('stick'),nub=document.getElementById('nub');let stickId=null;
