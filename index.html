@@ -1,75 +1,68 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#071c16">
-<title>SHOHIN MINER</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#071c16"><title>SHOHIN MINER</title>
 <style>
-:root{color-scheme:dark;--bg:#071c16;--panel:#0d3024;--panel2:#123b2c;--line:#245340;--green:#08a56c;--lime:#baf05b;--gold:#e6b85c;--muted:#9bb4a7;--text:#f1f6f1}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1b4936 0,#071c16 55%);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-.app{max-width:760px;margin:auto;padding:14px 14px 30px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.brand{font-weight:900;letter-spacing:.12em;font-size:17px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:.18em}.cash{background:#102b21;border:1px solid var(--line);padding:9px 13px;border-radius:13px;text-align:right}.cash small{display:block;color:var(--muted);font-size:10px}.cash strong{color:var(--lime);font-size:19px;font-variant-numeric:tabular-nums}
-.hero{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:linear-gradient(145deg,#153b2c,#0a2119);box-shadow:0 16px 40px #0005}.herohead{display:flex;justify-content:space-between;align-items:center;padding:14px 15px 8px}.eyebrow{font-size:10px;color:var(--muted);letter-spacing:.16em}.floor{font-weight:800}.status{font-size:10px;color:var(--lime);border:1px solid #527c42;border-radius:99px;padding:4px 8px}
-.mine{position:relative;height:270px;overflow:hidden;background:linear-gradient(#182d25 0%,#302b20 40%,#171c18 100%);border-top:1px solid #31503e;border-bottom:1px solid #31503e}
-.rock{position:absolute;inset:0;background:repeating-linear-gradient(168deg,transparent 0 34px,#ffffff08 35px 37px,transparent 38px 62px),linear-gradient(90deg,#0005,transparent 22%,transparent 78%,#0006)}
-.tunnel{position:absolute;left:8%;right:8%;top:70px;height:130px;border:12px solid #5a5140;border-bottom-width:18px;border-radius:50% 50% 4px 4px;background:linear-gradient(#1c211b,#28251c);box-shadow:inset 0 0 30px #000b,0 8px 0 #161b16}
-.rail{position:absolute;left:6%;right:6%;bottom:27px;height:5px;background:#9a8a68;box-shadow:0 8px 0 #514b3d}
-.support{position:absolute;top:70px;bottom:45px;width:9px;background:linear-gradient(90deg,#473d2d,#9b8251,#403727);box-shadow:0 0 8px #0008}.s1{left:18%}.s2{left:48%}.s3{right:18%}
-.lamp{position:absolute;top:48px;width:9px;height:9px;border-radius:50%;background:#ffd77b;box-shadow:0 0 18px 9px #f2b64b66}.l1{left:28%}.l2{right:28%}
-.miner{position:absolute;bottom:37px;width:27px;height:47px}.miner:before{content:"";position:absolute;top:0;left:5px;width:18px;height:17px;border-radius:50% 50% 35% 35%;background:#d5a56b;border-top:6px solid #e0b84e}.miner:after{content:"";position:absolute;top:16px;left:4px;width:20px;height:28px;border-radius:6px;background:#287b58;box-shadow:inset 0 -7px #174a38}.m1{left:25%}.m2{left:54%;transform:scale(.9)}.m3{left:72%;transform:scale(.82)}
-.ore{position:absolute;bottom:26px;left:38%;width:40px;height:23px;background:linear-gradient(135deg,#3b3530,#c18a37 45%,#5b482e);clip-path:polygon(12% 55%,35% 0,72% 12%,100% 70%,70% 100%,20% 90%);filter:drop-shadow(0 2px 2px #000)}
-.elevator{position:absolute;right:10%;top:85px;width:32px;height:100px;border:4px solid #a78a53;background:repeating-linear-gradient(0deg,#463d2e 0 12px,#6d5b3c 13px 15px);box-shadow:0 0 15px #0008}.elevator:after{content:"";position:absolute;left:-8px;right:-8px;bottom:-8px;height:7px;background:#c6a35c}
-.minefoot{display:flex;justify-content:space-between;gap:10px;padding:12px 15px;color:var(--muted);font-size:12px}.minefoot b{color:var(--text)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:13px 0}.stat{background:#0c2a20;border:1px solid var(--line);border-radius:13px;padding:11px 9px}.stat small{display:block;color:var(--muted);font-size:10px}.stat b{display:block;margin-top:3px;font-size:16px}
-.section{display:flex;justify-content:space-between;align-items:center;margin:17px 2px 9px}.section h2{font-size:14px;margin:0;letter-spacing:.04em}.section span{font-size:10px;color:var(--muted)}
-.upgrades{display:grid;grid-template-columns:1fr;gap:8px}.upgrade{display:flex;align-items:center;gap:11px;padding:12px;background:#0d3024;border:1px solid var(--line);border-radius:14px}.ico{width:40px;height:40px;display:grid;place-items:center;background:#173e2e;border-radius:11px;font-size:21px}.info{flex:1;min-width:0}.info b{display:block;font-size:13px}.info small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.buy{border:1px solid #658c42;background:linear-gradient(180deg,#baf05b,#8fc83e);color:#142414;font-weight:900;border-radius:10px;padding:9px 11px;min-width:83px}
-button{font:inherit;cursor:pointer}.buy:disabled{opacity:.4;filter:grayscale(1)}.footer{text-align:center;color:#718c7e;font-size:10px;margin-top:20px;letter-spacing:.12em}
-@media(min-width:600px){.mine{height:320px}.upgrades{grid-template-columns:repeat(3,1fr)}.upgrade{align-items:flex-start;flex-direction:column}.buy{width:100%}}
-</style>
-</head>
-<body>
-<main class="app">
-<header class="top"><div><div class="brand">♛ SHOHIN <span>MINER</span></div><div class="sub">UNDERGROUND MINING COMPANY</div></div><div class="cash"><small>ВАШ БАЛАНС</small><strong id="cash">$ 250</strong></div></header>
-<section class="hero">
-<div class="herohead"><div><div class="eyebrow">ПОДЗЕМНЫЙ КОМПЛЕКС</div><div class="floor">Этаж 01 · Угольная шахта</div></div><div class="status">● РАБОТАЕТ</div></div>
-<div class="mine"><div class="rock"></div><div class="tunnel"></div><div class="support s1"></div><div class="support s2"></div><div class="support s3"></div><div class="lamp l1"></div><div class="lamp l2"></div><div class="miner m1"></div><div class="miner m2"></div><div class="miner m3"></div><div class="ore"></div><div class="elevator"></div><div class="rail"></div></div>
-<div class="minefoot"><span>ДОБЫЧА <b id="rate">3</b> ед./сек</span><span>РУДА <b id="oreCount">0</b> / <b id="capacity">100</b></span></div>
-</section>
-<div class="grid"><div class="stat"><small>ШАХТЁРЫ</small><b id="miners">3 / 3</b></div><div class="stat"><small>УРОВЕНЬ ШАХТЫ</small><b id="mineLevel">1</b></div><div class="stat"><small>ПРИБЫЛЬ / СЕК</small><b id="profit">$ 3</b></div></div>
-<div class="section"><h2>УЛУЧШЕНИЯ</h2><span>РАЗВИВАЙТЕ ПРОИЗВОДСТВО</span></div>
-<div class="upgrades">
-<div class="upgrade"><div class="ico">⛏</div><div class="info"><b>Шахтёры</b><small>Увеличить скорость добычи · ур. <span id="minerLv">1</span></small></div><button class="buy" id="minerBuy"> $ 50 </button></div>
-<div class="upgrade"><div class="ico">↕</div><div class="info"><b>Лифт</b><small>Увеличить пропускную способность · ур. <span id="liftLv">1</span></small></div><button class="buy" id="liftBuy">$ 75</button></div>
-<div class="upgrade"><div class="ico">▤</div><div class="info"><b>Склад</b><small>Увеличить вместимость · ур. <span id="storeLv">1</span></small></div><button class="buy" id="storeBuy">$ 60</button></div>
+:root{color-scheme:dark;--bg:#071c16;--panel:#0d3024;--line:#285440;--green:#08a56c;--lime:#baf05b;--gold:#e6b85c;--muted:#9bb4a7;--text:#f1f6f1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#204b37,#071c16 62%);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:850px;margin:auto;padding:12px 13px 28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.brand{font-weight:950;letter-spacing:.12em}.brand span{color:var(--lime)}.sub,.eyebrow,.muted{color:var(--muted);font-size:10px;letter-spacing:.14em}.cash{background:#102b21;border:1px solid var(--line);padding:8px 12px;border-radius:12px;text-align:right}.cash small{display:block;color:var(--muted);font-size:10px}.cash b{font-size:19px;color:var(--lime)}
+.panel{border:1px solid var(--line);border-radius:17px;overflow:hidden;background:#0b261d;box-shadow:0 14px 36px #0005}.head{display:flex;justify-content:space-between;align-items:center;padding:13px 14px}.head strong{display:block;font-size:15px}.status{font-size:10px;color:var(--lime);border:1px solid #527c42;padding:4px 8px;border-radius:20px}#world{height:310px;position:relative;background:linear-gradient(#253b32,#17231d);overflow:hidden}#world canvas{display:block;width:100%;height:100%;touch-action:pan-y}.loading{position:absolute;inset:0;display:grid;place-items:center;color:#d9e8d8;font-size:12px;pointer-events:none}.foot{display:flex;justify-content:space-between;gap:8px;padding:11px 14px;color:var(--muted);font-size:11px}.foot b{color:#fff}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:11px 0}.stat{background:#0c2a20;border:1px solid var(--line);border-radius:12px;padding:10px}.stat small{display:block;color:var(--muted);font-size:10px}.stat b{display:block;margin-top:3px;font-size:16px}.section{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 8px}.section b{font-size:13px;letter-spacing:.06em}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.card{background:linear-gradient(145deg,#123b2c,#0b261d);border:1px solid var(--line);border-radius:13px;padding:11px 9px}.icon{font-size:22px;margin-bottom:5px}.card strong{display:block;font-size:12px}.card small{display:block;color:var(--muted);font-size:10px;min-height:29px;margin:4px 0 9px}.buy,.sell{width:100%;border:0;border-radius:9px;padding:9px 5px;font-weight:900;background:linear-gradient(#c6f36a,#8fc83e);color:#142414}.buy:disabled,.sell:disabled{opacity:.35;filter:grayscale(1)}.sellrow{display:flex;align-items:center;gap:10px;background:#0d3024;border:1px solid var(--line);border-radius:13px;padding:10px}.sellrow .icon{margin:0}.sellrow div:nth-child(2){flex:1}.sellrow strong{font-size:12px}.sellrow small{display:block;color:var(--muted);font-size:10px}.sell{width:auto;min-width:110px}.note{text-align:center;color:#789184;font-size:10px;margin-top:17px}
+@media(max-width:430px){#world{height:270px}.cards{gap:6px}.card{padding:9px 7px}.card strong{font-size:11px}.card small{font-size:9px}.buy{font-size:11px}}
+</style></head>
+<body><main class="app">
+<header class="top"><div><div class="brand">♛ SHOHIN <span>MINER</span></div><div class="sub">UNDERGROUND MINING COMPANY</div></div><div class="cash"><small>БАЛАНС</small><b id="cash">$ 250</b></div></header>
+<section class="panel"><div class="head"><div><div class="eyebrow">ПОДЗЕМНЫЙ КОМПЛЕКС</div><strong>Этаж 01 · Угольная шахта</strong></div><div class="status">● РАБОТАЕТ</div></div>
+<div id="world"><div class="loading" id="loading">Загрузка 3D-шахты…</div></div>
+<div class="foot"><span>ДОБЫЧА <b id="rate">3</b> ед./сек</span><span>УГОЛЬ <b id="ore">0</b> / <b id="capacity">100</b></span></div></section>
+<div class="stats"><div class="stat"><small>ШАХТЁРЫ</small><b id="miners">3</b></div><div class="stat"><small>УРОВЕНЬ ШАХТЫ</small><b id="level">1</b></div><div class="stat"><small>ДОХОД / СЕК</small><b id="income">$ 3</b></div></div>
+<div class="section"><b>УЛУЧШЕНИЯ</b><span class="muted">РАЗВИВАЙТЕ ШАХТУ</span></div>
+<div class="cards">
+<div class="card"><div class="icon">⛏️</div><strong>Шахтёры</strong><small>Больше рабочих и быстрее добыча · ур. <span id="ml">1</span></small><button class="buy" id="mb">Улучшить · $50</button></div>
+<div class="card"><div class="icon">🛗</div><strong>Лифт</strong><small>Быстрее поднимает руду · ур. <span id="ll">1</span></small><button class="buy" id="lb">Улучшить · $75</button></div>
+<div class="card"><div class="icon">📦</div><strong>Склад</strong><small>Больше места для угля · ур. <span id="sl">1</span></small><button class="buy" id="sb">Улучшить · $60</button></div>
 </div>
-<div class="section"><h2>ПРОДАЖА РУДЫ</h2><span>УГОЛЬ · БАЗОВЫЙ РЕСУРС</span></div>
-<div class="upgrade"><div class="ico">◆</div><div class="info"><b>Продать добытый уголь</b><small>Получайте деньги за каждую единицу ресурса</small></div><button class="buy" id="sell">ПРОДАТЬ</button></div>
-<div class="footer">SHOHIN TAJIKISTAN · GAME PROTOTYPE</div>
+<div class="section"><b>ПРОДАЖА РУДЫ</b><span class="muted">УГОЛЬ</span></div>
+<div class="sellrow"><div class="icon">◆</div><div><strong>Продать весь уголь</strong><small>$5 за единицу ресурса</small></div><button class="sell" id="sell">ПРОДАТЬ</button></div>
+<div class="note">SHOHIN TAJIKISTAN · 3D GAME PROTOTYPE</div>
 </main>
-<script>
-(()=>{
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const $=id=>document.getElementById(id);
 const defaults={cash:250,ore:0,minerLv:1,liftLv:1,storeLv:1,last:Date.now()};
 let s;try{s={...defaults,...JSON.parse(localStorage.getItem('shohinMinerSave')||'{}')}}catch{s={...defaults}}
-const $=id=>document.getElementById(id);
-const cost={miner:()=>Math.floor(50*Math.pow(1.65,s.minerLv-1)),lift:()=>Math.floor(75*Math.pow(1.7,s.liftLv-1)),store:()=>Math.floor(60*Math.pow(1.6,s.storeLv-1))};
-const capacity=()=>100+(s.storeLv-1)*75;
-const rate=()=>s.minerLv*3;
-const fmt=n=>Math.floor(n).toLocaleString('en-US');
+const cost={miner:()=>Math.floor(50*1.65**(s.minerLv-1)),lift:()=>Math.floor(75*1.7**(s.liftLv-1)),store:()=>Math.floor(60*1.6**(s.storeLv-1))};
+const capacity=()=>100+(s.storeLv-1)*75, rate=()=>s.minerLv*3, fmt=n=>Math.floor(n).toLocaleString('en-US');
 function save(){s.last=Date.now();localStorage.setItem('shohinMinerSave',JSON.stringify(s))}
-function render(){
-$('cash').textContent='$ '+fmt(s.cash);$('oreCount').textContent=fmt(s.ore);$('capacity').textContent=fmt(capacity());
-$('rate').textContent=rate();$('profit').textContent='$ '+rate();$('miners').textContent=(2+s.minerLv)+' / '+(2+s.minerLv);
-$('mineLevel').textContent=s.minerLv;$('minerLv').textContent=s.minerLv;$('liftLv').textContent=s.liftLv;$('storeLv').textContent=s.storeLv;
-[['minerBuy','miner'],['liftBuy','lift'],['storeBuy','store']].forEach(([id,k])=>{$(id).textContent='$ '+fmt(cost[k]());$(id).disabled=s.cash<cost[k]()});
-$('sell').disabled=s.ore<1;
-}
-function buy(k){const c=cost[k]();if(s.cash<c)return;s.cash-=c;s[k+'Lv']++;save();render()}
-$('minerBuy').onclick=()=>buy('miner');$('liftBuy').onclick=()=>buy('lift');$('storeBuy').onclick=()=>buy('store');
-$('sell').onclick=()=>{const amount=Math.floor(s.ore);s.ore-=amount;s.cash+=amount*5;save();render()};
-const away=Math.min(4*60*60,Math.max(0,(Date.now()-s.last)/1000));s.ore=Math.min(capacity(),s.ore+away*rate()*.5);
-let prev=Date.now();function tick(){const now=Date.now(),dt=Math.min(1,(now-prev)/1000);prev=now;s.ore=Math.min(capacity(),s.ore+rate()*dt);render()}
-render();setInterval(tick,250);window.addEventListener('beforeunload',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
-})();
-</script>
-</body>
-</html>
+function render(){ $('cash').textContent='$ '+fmt(s.cash);$('ore').textContent=fmt(s.ore);$('capacity').textContent=fmt(capacity());$('rate').textContent=rate();$('income').textContent='$ '+rate();$('miners').textContent=2+s.minerLv;$('level').textContent=s.minerLv;$('ml').textContent=s.minerLv;$('ll').textContent=s.liftLv;$('sl').textContent=s.storeLv;
+[['mb','miner'],['lb','lift'],['sb','store']].forEach(([id,k])=>{$(id).textContent='Улучшить · $'+fmt(cost[k]());$(id).disabled=s.cash<cost[k]()});$('sell').disabled=s.ore<1;}
+function buy(k){let c=cost[k]();if(s.cash<c)return;s.cash-=c;s[k+'Lv']++;save();render();syncWorkers()}
+$('mb').onclick=()=>buy('miner');$('lb').onclick=()=>buy('lift');$('sb').onclick=()=>buy('store');$('sell').onclick=()=>{let n=Math.floor(s.ore);s.ore-=n;s.cash+=n*5;save();render()};
+const away=Math.min(14400,Math.max(0,(Date.now()-s.last)/1000));s.ore=Math.min(capacity(),s.ore+away*rate()*.5);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x263b31);scene.fog=new THREE.Fog(0x263b31,12,27);
+const camera=new THREE.PerspectiveCamera(37,1,.1,100);camera.position.set(8,7,11);camera.lookAt(0,1.6,0);
+const renderer=new THREE.WebGLRenderer({antialias:false,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('world').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xb9d9c4,0x241b12,2));
+const key=new THREE.DirectionalLight(0xffd18a,3);key.position.set(4,9,6);key.castShadow=true;scene.add(key);
+const mat=(color,roughness=.9)=>new THREE.MeshStandardMaterial({color,roughness});
+const rock=mat(0x51483b),dark=mat(0x202820),wood=mat(0x765a35),gold=mat(0xd6a94f),railmat=mat(0x8b8b7a),coal=mat(0x262b2a),skin=mat(0xc98f60),shirt=mat(0x16865b),pants=mat(0x273b35),helmet=mat(0xe5b63f);
+function block(w,h,d,m,x,y,z){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+block(14,.5,10,rock,0,-.28,0);block(14,5,.5,rock,0,2.2,-4.7);block(14,5,.5,rock,0,2.2,4.7);block(.5,5,10,rock,-6.8,2.2,0);block(.5,5,10,rock,6.8,2.2,0);
+block(8,.22,3,dark,-1,1.25,-1.6);block(8,.2,3,wood,-1,2.1,-1.6);
+for(let i=0;i<7;i++){let b=block(.5,.18,.45,coal,-4.1+(i%4)*.55,.05,-.6+Math.floor(i/4)*.5);b.rotation.z=.25}
+for(let x of [-5,-2,1,4]){block(.18,3.8,.2,wood,x,1.7,-3.9);block(.18,3.8,.2,wood,x,1.7,3.9);block(.3,.18,8,wood,x,3.55,0)}
+// Rails and mine cart
+for(let z of [-.7,.7])block(9,.1,.12,railmat,-1,.04,z);
+for(let x=-5;x<4.5;x+=.8)block(.12,.08,1.8,wood,x,-.01,0);
+const cart=block(1.3,.45,1.1,mat(0x594b35),-2,.42,0);for(let x of [-2.45,-1.55])for(let z of [-.48,.48]){let w=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.12,10),dark);w.rotation.x=Math.PI/2;w.position.set(x,.18,z);scene.add(w)}
+// Elevator shaft, cage and rope
+block(1.8,4.8,1.8,wood,4,2.35,-2.7);for(let x of [3.25,4.75])for(let z of [-3.45,-1.95])block(.12,4.8,.12,gold,x,2.35,z);
+const cage=new THREE.Group();block(1.25,.15,1.2,gold,0,0,0).parent.remove;let base=new THREE.Mesh(new THREE.BoxGeometry(1.2,.16,1.1),gold);base.position.y=0;cage.add(base);for(let x of [-.55,.55])for(let z of [-.48,.48]){let p=new THREE.Mesh(new THREE.BoxGeometry(.08,1.25,.08),wood);p.position.set(x,.62,z);cage.add(p)}scene.add(cage);cage.position.set(4,1.2,-2.7);
+const rope=block(.045,2.6,.045,dark,4,4.8,-2.7);
+function makeMiner(x,z,index){const g=new THREE.Group();const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.25,.48,4,8),shirt);torso.position.y=.95;g.add(torso);const head=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),skin);head.position.y=1.48;g.add(head);const cap=new THREE.Mesh(new THREE.SphereGeometry(.25,12,8,0,Math.PI*2,0,Math.PI/2),helmet);cap.position.y=1.64;g.add(cap);const brim=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.055,12),helmet);brim.position.y=1.58;g.add(brim);const legmat=pants;let legs=[];for(let side of [-1,1]){let leg=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.35,3,6),legmat);leg.position.set(side*.13,.38,0);g.add(leg);legs.push(leg);let arm=new THREE.Mesh(new THREE.CapsuleGeometry(.075,.36,3,6),skin);arm.position.set(side*.29,1.02,0);arm.rotation.z=side*.3;g.add(arm)}const pick=new THREE.Group();let handle=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.8,7),wood);handle.rotation.z=.6;pick.add(handle);let headpick=new THREE.Mesh(new THREE.BoxGeometry(.55,.09,.12),railmat);headpick.position.set(.22,.3,0);headpick.rotation.z=-.25;pick.add(headpick);pick.position.set(.4,1.15,0);g.add(pick);g.position.set(x,0,z);g.userData={legs,pick,index};scene.add(g);return g}
+let workers=[];function syncWorkers(){let wanted=Math.min(12,2+s.minerLv);while(workers.length<wanted)workers.push(makeMiner(-3+(workers.length%4)*1.1,.9+Math.floor(workers.length/4)*.8,workers.length));workers.forEach((w,i)=>w.visible=i<wanted)}
+syncWorkers();
+const lamps=[];for(let x of [-4,0,4]){let l=new THREE.PointLight(0xffc66e,20,7,2);l.position.set(x,3.1,0);scene.add(l);let bulb=new THREE.Mesh(new THREE.SphereGeometry(.1,8,8),mat(0xffd889));bulb.position.copy(l.position);scene.add(bulb);lamps.push(l)}
+let resize=()=>{let w=$('world').clientWidth,h=$('world').clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)};new ResizeObserver(resize).observe($('world'));resize();$('loading').style.display='none';
+let prev=performance.now();function animate(t){requestAnimationFrame(animate);let dt=Math.min(.05,(t-prev)/1000);prev=t;workers.forEach((w,i)=>{if(!w.visible)return;let phase=t*.004+i*1.7;w.userData.pick.rotation.z=Math.sin(phase)*.55;w.userData.legs.forEach((l,j)=>l.rotation.x=Math.sin(phase+j*Math.PI)*.15);w.position.y=Math.abs(Math.sin(phase*2))*.025});cage.position.y=1.2+Math.sin(t*.0007)*.9;rope.scale.y=(4.8-cage.position.y)/2.6;rope.position.y=(4.8+cage.position.y)/2;cart.position.x=-2+Math.sin(t*.0005)*.7;renderer.render(scene,camera)}requestAnimationFrame(animate);
+let last=Date.now();function tick(){let now=Date.now(),dt=Math.min(1,(now-last)/1000);last=now;s.ore=Math.min(capacity(),s.ore+rate()*dt);render()}render();setInterval(tick,250);setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+</script></body></html>
