@@ -85,7 +85,7 @@ function makeMiner(x,z,index){
   const leftLeg=limb(root,.34,.32,trouserMat);leftLeg.pivot.position.set(-.13,.65,0);
   const rightLeg=limb(root,.34,.32,trouserMat);rightLeg.pivot.position.set(.13,.65,0);
   for(const leg of [leftLeg,rightLeg]){
-    const boot=new THREE.Mesh(new THREE.BoxGeometry(.19,.13,.3),bootMat);boot.position.set(0,-.67,.075);leg.elbow.add(boot);
+    const boot=new THREE.Mesh(new THREE.BoxGeometry(.19,.13,.3),bootMat);boot.position.set(0,-.33,.075);leg.elbow.add(boot);
   }
   // The pickaxe is attached to the right hand and swings with the miner's arm.
   const tool=new THREE.Group();tool.position.set(.02,-.63,.02);rightArm.elbow.add(tool);
