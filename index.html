@@ -25,8 +25,12 @@
 <div class="sellrow"><div class="icon">◆</div><div><strong>Продать весь уголь</strong><small>$5 за единицу ресурса</small></div><button class="sell" id="sell">ПРОДАТЬ</button></div>
 <div class="note">SHOHIN TAJIKISTAN · 3D GAME PROTOTYPE</div>
 </main>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
+import { Library, catalogFromFiles, Character } from 'https://cdn.jsdelivr.net/gh/NoLimitNexus/game-models@main/character.js';
 const $=id=>document.getElementById(id);
 const defaults={cash:250,ore:0,minerLv:1,liftLv:1,storeLv:1,last:Date.now()};
 let s;try{s={...defaults,...JSON.parse(localStorage.getItem('shohinMinerSave')||'{}')}}catch{s={...defaults}}
@@ -58,11 +62,45 @@ const cart=block(1.3,.45,1.1,mat(0x594b35),-2,.42,0);for(let x of [-2.45,-1.55])
 block(1.8,4.8,1.8,wood,4,2.35,-2.7);for(let x of [3.25,4.75])for(let z of [-3.45,-1.95])block(.12,4.8,.12,gold,x,2.35,z);
 const cage=new THREE.Group();block(1.25,.15,1.2,gold,0,0,0).parent.remove;let base=new THREE.Mesh(new THREE.BoxGeometry(1.2,.16,1.1),gold);base.position.y=0;cage.add(base);for(let x of [-.55,.55])for(let z of [-.48,.48]){let p=new THREE.Mesh(new THREE.BoxGeometry(.08,1.25,.08),wood);p.position.set(x,.62,z);cage.add(p)}scene.add(cage);cage.position.set(4,1.2,-2.7);
 const rope=block(.045,2.6,.045,dark,4,4.8,-2.7);
-function makeMiner(x,z,index){const g=new THREE.Group();const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.25,.48,4,8),shirt);torso.position.y=.95;g.add(torso);const head=new THREE.Mesh(new THREE.SphereGeometry(.22,12,10),skin);head.position.y=1.48;g.add(head);const cap=new THREE.Mesh(new THREE.SphereGeometry(.25,12,8,0,Math.PI*2,0,Math.PI/2),helmet);cap.position.y=1.64;g.add(cap);const brim=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.055,12),helmet);brim.position.y=1.58;g.add(brim);const legmat=pants;let legs=[];for(let side of [-1,1]){let leg=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.35,3,6),legmat);leg.position.set(side*.13,.38,0);g.add(leg);legs.push(leg);let arm=new THREE.Mesh(new THREE.CapsuleGeometry(.075,.36,3,6),skin);arm.position.set(side*.29,1.02,0);arm.rotation.z=side*.3;g.add(arm)}const pick=new THREE.Group();let handle=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.8,7),wood);handle.rotation.z=.6;pick.add(handle);let headpick=new THREE.Mesh(new THREE.BoxGeometry(.55,.09,.12),railmat);headpick.position.set(.22,.3,0);headpick.rotation.z=-.25;pick.add(headpick);pick.position.set(.4,1.15,0);g.add(pick);g.position.set(x,0,z);g.userData={legs,pick,index};scene.add(g);return g}
-let workers=[];function syncWorkers(){let wanted=Math.min(12,2+s.minerLv);while(workers.length<wanted)workers.push(makeMiner(-3+(workers.length%4)*1.1,.9+Math.floor(workers.length/4)*.8,workers.length));workers.forEach((w,i)=>w.visible=i<wanted)}
+let workers=[];
+const MODEL_BASE='https://cdn.jsdelivr.net/gh/NoLimitNexus/game-models@main/';
+async function makeMiner(x,z,index,lib){
+  const character=await Character.create(lib,{
+    parts:{hair:'hair_tousled',top:'top_long',bottom:'bottom_trousers',boots:'boots_tall',hat:'hat_beanie',back:'back_pack'},
+    colors:{skin:'#e8b98f',hair:'#38271d',shirt:index%2?'#087b53':'#08a56c',trousers:'#343d39',boots:'#26221d',hat:'#d9a23a',pack:'#76522e'},
+    tool:'pickaxe'
+  });
+  character.setHeight(1.55);
+  character.holder.position.set(x,0,z);
+  character.holder.rotation.y=-Math.PI/2;
+  scene.add(character.holder);
+  await character.playRole('mine');
+  return character;
+}
+let minerLibrary=null, minersLoading=false;
+async function syncWorkers(){
+  if(minersLoading)return;
+  minersLoading=true;
+  try{
+    if(!minerLibrary){
+      const catalog=await catalogFromFiles(MODEL_BASE);
+      minerLibrary=new Library(catalog);
+    }
+    const wanted=Math.min(12,2+s.minerLv);
+    while(workers.length<wanted){
+      const i=workers.length;
+      const worker=await makeMiner(-3+(i%4)*1.1,.9+Math.floor(i/4)*.8,i,minerLibrary);
+      workers.push(worker);
+    }
+  }catch(err){
+    console.error('3D character assets could not load:',err);
+    $('loading').style.display='grid';
+    $('loading').textContent='Не удалось загрузить 3D-модели. Проверьте интернет и обновите страницу.';
+  }finally{minersLoading=false;}
+}
 syncWorkers();
 const lamps=[];for(let x of [-4,0,4]){let l=new THREE.PointLight(0xffc66e,20,7,2);l.position.set(x,3.1,0);scene.add(l);let bulb=new THREE.Mesh(new THREE.SphereGeometry(.1,8,8),mat(0xffd889));bulb.position.copy(l.position);scene.add(bulb);lamps.push(l)}
 let resize=()=>{let w=$('world').clientWidth,h=$('world').clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)};new ResizeObserver(resize).observe($('world'));resize();$('loading').style.display='none';
-let prev=performance.now();function animate(t){requestAnimationFrame(animate);let dt=Math.min(.05,(t-prev)/1000);prev=t;workers.forEach((w,i)=>{if(!w.visible)return;let phase=t*.004+i*1.7;w.userData.pick.rotation.z=Math.sin(phase)*.55;w.userData.legs.forEach((l,j)=>l.rotation.x=Math.sin(phase+j*Math.PI)*.15);w.position.y=Math.abs(Math.sin(phase*2))*.025});cage.position.y=1.2+Math.sin(t*.0007)*.9;rope.scale.y=(4.8-cage.position.y)/2.6;rope.position.y=(4.8+cage.position.y)/2;cart.position.x=-2+Math.sin(t*.0005)*.7;renderer.render(scene,camera)}requestAnimationFrame(animate);
+let prev=performance.now();function animate(t){requestAnimationFrame(animate);let dt=Math.min(.05,(t-prev)/1000);prev=t;workers.forEach(w=>w.update(dt));cage.position.y=1.2+Math.sin(t*.0007)*.9;rope.scale.y=(4.8-cage.position.y)/2.6;rope.position.y=(4.8+cage.position.y)/2;cart.position.x=-2+Math.sin(t*.0005)*.7;renderer.render(scene,camera)}requestAnimationFrame(animate);
 let last=Date.now();function tick(){let now=Date.now(),dt=Math.min(1,(now-last)/1000);last=now;s.ore=Math.min(capacity(),s.ore+rate()*dt);render()}render();setInterval(tick,250);setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 </script></body></html>
