@@ -44,15 +44,42 @@ const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-per
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.setClearColor(0x9bc9d4,1);renderer.domElement.style.imageRendering='auto';root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xc8e8ff,0x38513a,1.7));
 const sun=new THREE.DirectionalLight(0xffedcf,3.1);sun.position.set(-260,380,-180);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-320;sun.shadow.camera.right=320;sun.shadow.camera.top=320;sun.shadow.camera.bottom=-320;sun.shadow.bias=-.00025;scene.add(sun);
-// Clear tropical ocean with a subtle animated-looking normal pattern.
+// High-quality tropical ocean: shallow turquoise shelf, deep offshore blue, moving multi-scale waves and scrolling micro-ripples.
 function makeWaterNormal(){
  const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d'),im=ctx.createImageData(256,256);
- for(let y=0;y<256;y++)for(let x=0;x<256;x++){const i=(y*256+x)*4,n=128+Math.sin(x*.19+Math.sin(y*.11)*2)*17+Math.cos(y*.23+x*.07)*13;im.data[i]=n;im.data[i+1]=n;im.data[i+2]=255;im.data[i+3]=255}
- ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(90,90);t.colorSpace=THREE.NoColorSpace;return t;
+ for(let y=0;y<256;y++)for(let x=0;x<256;x++){
+  const i=(y*256+x)*4;
+  const n=128+Math.sin(x*.16+Math.sin(y*.075)*2.2)*24+Math.cos(y*.21+x*.055)*19+Math.sin((x+y)*.31)*8;
+  im.data[i]=n;im.data[i+1]=n;im.data[i+2]=255;im.data[i+3]=255;
+ }
+ ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(115,115);t.colorSpace=THREE.NoColorSpace;return t;
 }
 const oceanNormal=makeWaterNormal();
-const seaMat=new THREE.MeshPhysicalMaterial({color:0x168da0,roughness:.19,metalness:.12,clearcoat:.9,clearcoatRoughness:.12,normalMap:oceanNormal,normalScale:new THREE.Vector2(.28,.28)});
-const sea=new THREE.Mesh(new THREE.PlaneGeometry(16000,16000,1,1),seaMat);sea.rotation.x=-Math.PI/2;sea.position.y=-2.8;scene.add(sea);
+const seaGeo=new THREE.PlaneGeometry(16000,16000,240,240);
+const seaColors=[],shallow=new THREE.Color(0x35b9ad),reef=new THREE.Color(0x087f91),deep=new THREE.Color(0x063c59);
+const seaPos=seaGeo.attributes.position;
+for(let i=0;i<seaPos.count;i++){
+ const d=Math.hypot(seaPos.getX(i),seaPos.getY(i));
+ const c=d<2550?shallow.clone().lerp(reef,THREE.MathUtils.smoothstep(d,1850,2550)):reef.clone().lerp(deep,THREE.MathUtils.smoothstep(d,2550,7200));
+ const sparkle=(Math.sin(seaPos.getX(i)*.013+seaPos.getY(i)*.009)*.5+.5)*.025;
+ c.offsetHSL(0,0,sparkle);seaColors.push(c.r,c.g,c.b);
+}
+seaGeo.setAttribute('color',new THREE.Float32BufferAttribute(seaColors,3));
+const seaMat=new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.16,metalness:.04,clearcoat:1,clearcoatRoughness:.075,normalMap:oceanNormal,normalScale:new THREE.Vector2(.42,.42)});
+seaMat.onBeforeCompile=(shader)=>{
+ shader.uniforms.uOceanTime={value:0};
+ shader.vertexShader='uniform float uOceanTime;\n'+shader.vertexShader;
+ shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+ float oceanX=position.x;
+ float oceanZ=position.y;
+ float swell=sin(oceanX*0.0024+uOceanTime*0.72)*0.62
+            +sin(oceanZ*0.0031-uOceanTime*0.58)*0.34
+            +sin((oceanX+oceanZ)*0.006+uOceanTime*1.15)*0.13;
+ transformed.z += swell;
+ `);
+ seaMat.userData.shader=shader;
+};
+const sea=new THREE.Mesh(seaGeo,seaMat);sea.rotation.x=-Math.PI/2;sea.position.y=-2.8;scene.add(sea);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function hash(x,z){let n=Math.sin(x*127.1+z*311.7)*43758.5453;return n-Math.floor(n)}
 function noise(x,z){let ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz;fx=fx*fx*(3-2*fx);fz=fz*fz*(3-2*fz);return THREE.MathUtils.lerp(THREE.MathUtils.lerp(hash(ix,iz),hash(ix+1,iz),fx),THREE.MathUtils.lerp(hash(ix,iz+1),hash(ix+1,iz+1),fx),fz)}
@@ -282,7 +309,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  const introT=clamp((now-introStarted)/introDuration,0,1);
  if(introT<1&&!overview){const e=introT*introT*(3-2*introT),target=new THREE.Vector3(player.position.x+Math.sin(yaw)*13,player.position.y+7.7+pitch*12,player.position.z+Math.cos(yaw)*13),look=new THREE.Vector3(player.position.x,player.position.y+4.2,player.position.z);camera.position.lerpVectors(introFrom,target,e);camera.lookAt(introLookFrom.clone().lerp(look,e))}
  palmFronds.rotation.z=Math.sin(now*.0007)*.006;palmFronds.rotation.x=Math.cos(now*.00055)*.004;
- sea.position.y=-2.8+Math.sin(now*.00045)*.12;waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
+ sea.position.y=-2.8+Math.sin(now*.00045)*.055;if(seaMat.userData.shader)seaMat.userData.shader.uniforms.uOceanTime.value=now*.001;oceanNormal.offset.set((now*.000012)%1,(now*.000008)%1);waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
 requestAnimationFrame(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);updateCamera()});
 const stick=document.getElementById('stick'),nub=document.getElementById('nub');let stickId=null;
