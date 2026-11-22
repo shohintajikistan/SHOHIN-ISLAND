@@ -82,8 +82,10 @@ async function syncWorkers(){
   if(minersLoading)return;
   minersLoading=true;
   try{
+    if(workers.length===0){$('loading').style.display='grid';$('loading').textContent='Загрузка профессиональных 3D-моделей…';}
     if(!minerLibrary){
       const catalog=await catalogFromFiles(MODEL_BASE);
+      catalog.animations=catalog.animations.filter(f=>f.group==='Tools');
       minerLibrary=new Library(catalog);
     }
     const wanted=Math.min(12,2+s.minerLv);
@@ -92,11 +94,12 @@ async function syncWorkers(){
       const worker=await makeMiner(-3+(i%4)*1.1,.9+Math.floor(i/4)*.8,i,minerLibrary);
       workers.push(worker);
     }
+    $('loading').style.display='none';
   }catch(err){
     console.error('3D character assets could not load:',err);
     $('loading').style.display='grid';
     $('loading').textContent='Не удалось загрузить 3D-модели. Проверьте интернет и обновите страницу.';
-  }finally{minersLoading=false;}
+  }finally{minersLoading=false;if(workers.length<Math.min(12,2+s.minerLv))syncWorkers();}
 }
 syncWorkers();
 const lamps=[];for(let x of [-4,0,4]){let l=new THREE.PointLight(0xffc66e,20,7,2);l.position.set(x,3.1,0);scene.add(l);let bulb=new THREE.Mesh(new THREE.SphereGeometry(.1,8,8),mat(0xffd889));bulb.position.copy(l.position);scene.add(bulb);lamps.push(l)}
