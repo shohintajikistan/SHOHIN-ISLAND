@@ -21,7 +21,7 @@
 #error{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:28px;background:#071c16;z-index:20;color:#effff5}
 </style>
 <script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
 </script>
 </head>
 <body>
@@ -35,6 +35,7 @@
 <div id="notice"></div><div id="error"></div>
 <script type="module">
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const root=document.getElementById('game'),loading=document.getElementById('loading'),hud=document.getElementById('hud');
 try{
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9bc9d4);scene.fog=new THREE.FogExp2(0x9bc9d4,.00018);
@@ -89,6 +90,45 @@ const bushGeo=new THREE.IcosahedronGeometry(1.8,1),bushMat=new THREE.MeshStandar
 const bushes=new THREE.InstancedMesh(bushGeo,bushMat,2400);let bc=0;
 for(let i=0;i<2400;i++){const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<3||y>110||Math.hypot(x,z)>2200)continue;const sc=.7+Math.random()*2;dummy.position.set(x,y+sc,z);dummy.rotation.set(Math.random(),Math.random()*6,Math.random());dummy.scale.set(sc*1.3,sc*.65,sc);dummy.updateMatrix();bushes.setMatrixAt(bc++,dummy.matrix)}
 bushes.count=bc;scene.add(bushes);
+
+// Real CC0 glTF assets: loaded once, then cloned for mobile-friendly reuse.
+const gltfLoader=new GLTFLoader();
+function loadIslandAsset(url, placements, options={}){
+ gltfLoader.load(url,(gltf)=>{
+  const source=gltf.scene;
+  source.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+  for(const p of placements){
+   const obj=source.clone(true);
+   const s=p.scale||1;
+   obj.scale.setScalar(s);
+   obj.position.set(p.x,heightAt(p.x,p.z)+ (p.lift||0),p.z);
+   obj.rotation.y=p.rotation||0;
+   scene.add(obj);
+  }
+ },undefined,err=>console.warn('SHOHIN asset load failed:',url,err));
+}
+// Dense tropical buttress trees for the interior forest.
+loadIslandAsset('https://cdn.3dassets.dev/assets/6818/v1/model.glb',[
+ {x:-260,z:220,scale:1.0},{x:180,z:360,scale:.9},{x:420,z:-160,scale:1.05},
+ {x:-520,z:-260,scale:.85},{x:760,z:420,scale:1.0},{x:-820,z:180,scale:.9},
+ {x:960,z:-520,scale:.95},{x:-1080,z:-640,scale:1.0}
+]);
+// Branched tropical screwpine, a distinct shoreline and jungle species.
+loadIslandAsset('https://cdn.3dassets.dev/assets/6804/v1/model.glb',[
+ {x:-1450,z:820,scale:1.35},{x:-1580,z:920,scale:1.2},{x:1480,z:-980,scale:1.3},
+ {x:1620,z:-850,scale:1.15},{x:1180,z:1220,scale:1.25}
+]);
+// Coastal cave landmark, placed on the outer shore.
+loadIslandAsset('https://cdn.3dassets.dev/assets/6855/v1/model.glb',[
+ {x:2050,z:260,scale:1.15,rotation:Math.PI*.5}
+]);
+// Beach debris and palm stumps for small environmental detail.
+loadIslandAsset('https://cdn.3dassets.dev/assets/6837/v1/model.glb',[
+ {x:-1820,z:-420,scale:1.0,rotation:.7},{x:1760,z:620,scale:.9,rotation:2.1}
+]);
+loadIslandAsset('https://cdn.3dassets.dev/assets/6801/v1/model.glb',[
+ {x:-1710,z:-520,scale:1.0},{x:1690,z:700,scale:1.1}
+]);
 // scattered boulders
 const rockGeo=new THREE.DodecahedronGeometry(2.5,0),rockMat=new THREE.MeshStandardMaterial({color:0x777a73,roughness:1});const rocks=new THREE.InstancedMesh(rockGeo,rockMat,900);let rc=0;
 for(let i=0;i<900;i++){const x=(Math.random()-.5)*4200,z=(Math.random()-.5)*4200,y=heightAt(x,z);if(y<3)continue;dummy.position.set(x,y+1,z);dummy.rotation.set(Math.random(),Math.random()*6,Math.random());const s=.4+Math.random()*2.4;dummy.scale.set(s,s*.6,s);dummy.updateMatrix();rocks.setMatrixAt(rc++,dummy.matrix)}rocks.count=rc;rocks.castShadow=true;scene.add(rocks);
