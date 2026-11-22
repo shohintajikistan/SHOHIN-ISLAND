@@ -2,433 +2,74 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#071c16">
-<title>SHOHIN ISLAND</title>
+<title>SHOHIN MINER</title>
 <style>
-:root{color-scheme:dark;--green:#08a56c;--lime:#baf05b}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071c16;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#effff5;touch-action:none}
-#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%}
-#loading{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 35%,#174b36,#071c16 70%);z-index:10;transition:opacity .8s}
-.loadbox{text-align:center;padding:28px}.crown{font-size:38px;color:var(--lime);letter-spacing:8px}.brand{font-weight:900;letter-spacing:4px;font-size:clamp(24px,6vw,42px)}.sub{color:#b4d5c3;letter-spacing:3px;font-size:11px;margin-top:8px}.bar{width:190px;height:3px;background:#244b39;margin:24px auto 0;overflow:hidden;border-radius:5px}.bar:after{content:"";display:block;height:100%;width:40%;background:var(--lime);animation:load 1.1s infinite ease-in-out}@keyframes load{from{transform:translateX(-110%)}to{transform:translateX(360%)}}
-#hud{position:fixed;inset:0;pointer-events:none;display:none}.top{position:absolute;top:env(safe-area-inset-top,12px);left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.panel{background:linear-gradient(135deg,#071c16dc,#0d3024c9);border:1px solid #8bd5a52e;border-radius:14px;padding:10px 13px;backdrop-filter:blur(10px);box-shadow:0 8px 30px #0003}.logo{font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime)}.location{font-size:10px;color:#c0d8ca;margin-top:3px}.status{font-size:10px;color:#d6e9dc;text-align:right}.status b{color:var(--lime);font-weight:700}.hint{position:absolute;top:80px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;color:#e2f1e7;background:#071c1699;padding:7px 11px;border-radius:30px;border:1px solid #ffffff20}
-#controls{position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom,0px));height:140px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px;pointer-events:none}
-#stick{width:116px;height:116px;border-radius:50%;background:#071c1680;border:1px solid #d4f5df55;position:relative;pointer-events:auto;touch-action:none}
-#nub{position:absolute;width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#baf05b,#08a56c);border:2px solid #eaffd4;left:33px;top:33px;box-shadow:0 4px 18px #0007}
-.actions{display:flex;gap:12px;align-items:flex-end;pointer-events:auto}.act{width:58px;height:58px;border-radius:50%;border:1px solid #d5f5dd66;background:#071c16bb;color:#effff5;font-size:11px;font-weight:800;backdrop-filter:blur(8px)}.act.primary{background:linear-gradient(145deg,#0c9866,#07563d);border-color:#baf05b88}.act.zoom{width:42px;height:42px;font-size:20px}
-#cross{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#ffffffaa;transform:translate(-50%,-50%);opacity:.5}
-#notice{position:fixed;left:50%;bottom:165px;transform:translateX(-50%);background:#071c16dd;border:1px solid #baf05b55;padding:9px 14px;border-radius:12px;font-size:11px;display:none;white-space:nowrap}
-#error{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:28px;background:#071c16;z-index:20;color:#effff5}
+:root{color-scheme:dark;--bg:#071c16;--panel:#0d3024;--panel2:#123b2c;--line:#245340;--green:#08a56c;--lime:#baf05b;--gold:#e6b85c;--muted:#9bb4a7;--text:#f1f6f1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1b4936 0,#071c16 55%);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.app{max-width:760px;margin:auto;padding:14px 14px 30px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.brand{font-weight:900;letter-spacing:.12em;font-size:17px}.brand span{color:var(--lime)}.sub{font-size:10px;color:var(--muted);letter-spacing:.18em}.cash{background:#102b21;border:1px solid var(--line);padding:9px 13px;border-radius:13px;text-align:right}.cash small{display:block;color:var(--muted);font-size:10px}.cash strong{color:var(--lime);font-size:19px;font-variant-numeric:tabular-nums}
+.hero{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:linear-gradient(145deg,#153b2c,#0a2119);box-shadow:0 16px 40px #0005}.herohead{display:flex;justify-content:space-between;align-items:center;padding:14px 15px 8px}.eyebrow{font-size:10px;color:var(--muted);letter-spacing:.16em}.floor{font-weight:800}.status{font-size:10px;color:var(--lime);border:1px solid #527c42;border-radius:99px;padding:4px 8px}
+.mine{position:relative;height:270px;overflow:hidden;background:linear-gradient(#182d25 0%,#302b20 40%,#171c18 100%);border-top:1px solid #31503e;border-bottom:1px solid #31503e}
+.rock{position:absolute;inset:0;background:repeating-linear-gradient(168deg,transparent 0 34px,#ffffff08 35px 37px,transparent 38px 62px),linear-gradient(90deg,#0005,transparent 22%,transparent 78%,#0006)}
+.tunnel{position:absolute;left:8%;right:8%;top:70px;height:130px;border:12px solid #5a5140;border-bottom-width:18px;border-radius:50% 50% 4px 4px;background:linear-gradient(#1c211b,#28251c);box-shadow:inset 0 0 30px #000b,0 8px 0 #161b16}
+.rail{position:absolute;left:6%;right:6%;bottom:27px;height:5px;background:#9a8a68;box-shadow:0 8px 0 #514b3d}
+.support{position:absolute;top:70px;bottom:45px;width:9px;background:linear-gradient(90deg,#473d2d,#9b8251,#403727);box-shadow:0 0 8px #0008}.s1{left:18%}.s2{left:48%}.s3{right:18%}
+.lamp{position:absolute;top:48px;width:9px;height:9px;border-radius:50%;background:#ffd77b;box-shadow:0 0 18px 9px #f2b64b66}.l1{left:28%}.l2{right:28%}
+.miner{position:absolute;bottom:37px;width:27px;height:47px}.miner:before{content:"";position:absolute;top:0;left:5px;width:18px;height:17px;border-radius:50% 50% 35% 35%;background:#d5a56b;border-top:6px solid #e0b84e}.miner:after{content:"";position:absolute;top:16px;left:4px;width:20px;height:28px;border-radius:6px;background:#287b58;box-shadow:inset 0 -7px #174a38}.m1{left:25%}.m2{left:54%;transform:scale(.9)}.m3{left:72%;transform:scale(.82)}
+.ore{position:absolute;bottom:26px;left:38%;width:40px;height:23px;background:linear-gradient(135deg,#3b3530,#c18a37 45%,#5b482e);clip-path:polygon(12% 55%,35% 0,72% 12%,100% 70%,70% 100%,20% 90%);filter:drop-shadow(0 2px 2px #000)}
+.elevator{position:absolute;right:10%;top:85px;width:32px;height:100px;border:4px solid #a78a53;background:repeating-linear-gradient(0deg,#463d2e 0 12px,#6d5b3c 13px 15px);box-shadow:0 0 15px #0008}.elevator:after{content:"";position:absolute;left:-8px;right:-8px;bottom:-8px;height:7px;background:#c6a35c}
+.minefoot{display:flex;justify-content:space-between;gap:10px;padding:12px 15px;color:var(--muted);font-size:12px}.minefoot b{color:var(--text)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:13px 0}.stat{background:#0c2a20;border:1px solid var(--line);border-radius:13px;padding:11px 9px}.stat small{display:block;color:var(--muted);font-size:10px}.stat b{display:block;margin-top:3px;font-size:16px}
+.section{display:flex;justify-content:space-between;align-items:center;margin:17px 2px 9px}.section h2{font-size:14px;margin:0;letter-spacing:.04em}.section span{font-size:10px;color:var(--muted)}
+.upgrades{display:grid;grid-template-columns:1fr;gap:8px}.upgrade{display:flex;align-items:center;gap:11px;padding:12px;background:#0d3024;border:1px solid var(--line);border-radius:14px}.ico{width:40px;height:40px;display:grid;place-items:center;background:#173e2e;border-radius:11px;font-size:21px}.info{flex:1;min-width:0}.info b{display:block;font-size:13px}.info small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.buy{border:1px solid #658c42;background:linear-gradient(180deg,#baf05b,#8fc83e);color:#142414;font-weight:900;border-radius:10px;padding:9px 11px;min-width:83px}
+button{font:inherit;cursor:pointer}.buy:disabled{opacity:.4;filter:grayscale(1)}.footer{text-align:center;color:#718c7e;font-size:10px;margin-top:20px;letter-spacing:.12em}
+@media(min-width:600px){.mine{height:320px}.upgrades{grid-template-columns:repeat(3,1fr)}.upgrade{align-items:flex-start;flex-direction:column}.buy{width:100%}}
 </style>
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
-</script>
 </head>
 <body>
-<div id="game"></div>
-<div id="loading"><div class="loadbox"><div class="crown">♛ ✦ ✦ ✦</div><div class="brand">SHOHIN ISLAND</div><div class="sub">A WORLD TO DISCOVER</div><div class="bar"></div></div></div>
-<div id="hud">
- <div class="top"><div class="panel"><div class="logo">SHOHIN TAJIKISTAN</div><div class="location">SHOHIN ISLAND · OPEN WORLD</div></div><div class="panel status"><div>WORLD <b>143,100 KM²</b></div><div id="coords">X 0 · Z 0</div></div></div>
- <div class="hint">Проведи пальцем по экрану, чтобы осмотреть остров</div><div id="cross"></div>
- <div id="controls"><div id="stick"><div id="nub"></div></div><div class="actions"><button class="act" id="view">ВИД</button><button class="act" id="overview" aria-label="Показать весь остров" title="Обзор всего острова"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="act zoom" id="zoomIn" aria-label="Приблизить карту">+</button><button class="act zoom" id="zoomOut" aria-label="Отдалить карту">−</button><button class="act primary" id="jump">ПРЫЖОК</button></div></div>
+<main class="app">
+<header class="top"><div><div class="brand">♛ SHOHIN <span>MINER</span></div><div class="sub">UNDERGROUND MINING COMPANY</div></div><div class="cash"><small>ВАШ БАЛАНС</small><strong id="cash">$ 250</strong></div></header>
+<section class="hero">
+<div class="herohead"><div><div class="eyebrow">ПОДЗЕМНЫЙ КОМПЛЕКС</div><div class="floor">Этаж 01 · Угольная шахта</div></div><div class="status">● РАБОТАЕТ</div></div>
+<div class="mine"><div class="rock"></div><div class="tunnel"></div><div class="support s1"></div><div class="support s2"></div><div class="support s3"></div><div class="lamp l1"></div><div class="lamp l2"></div><div class="miner m1"></div><div class="miner m2"></div><div class="miner m3"></div><div class="ore"></div><div class="elevator"></div><div class="rail"></div></div>
+<div class="minefoot"><span>ДОБЫЧА <b id="rate">3</b> ед./сек</span><span>РУДА <b id="oreCount">0</b> / <b id="capacity">100</b></span></div>
+</section>
+<div class="grid"><div class="stat"><small>ШАХТЁРЫ</small><b id="miners">3 / 3</b></div><div class="stat"><small>УРОВЕНЬ ШАХТЫ</small><b id="mineLevel">1</b></div><div class="stat"><small>ПРИБЫЛЬ / СЕК</small><b id="profit">$ 3</b></div></div>
+<div class="section"><h2>УЛУЧШЕНИЯ</h2><span>РАЗВИВАЙТЕ ПРОИЗВОДСТВО</span></div>
+<div class="upgrades">
+<div class="upgrade"><div class="ico">⛏</div><div class="info"><b>Шахтёры</b><small>Увеличить скорость добычи · ур. <span id="minerLv">1</span></small></div><button class="buy" id="minerBuy"> $ 50 </button></div>
+<div class="upgrade"><div class="ico">↕</div><div class="info"><b>Лифт</b><small>Увеличить пропускную способность · ур. <span id="liftLv">1</span></small></div><button class="buy" id="liftBuy">$ 75</button></div>
+<div class="upgrade"><div class="ico">▤</div><div class="info"><b>Склад</b><small>Увеличить вместимость · ур. <span id="storeLv">1</span></small></div><button class="buy" id="storeBuy">$ 60</button></div>
 </div>
-<div id="notice"></div><div id="error"></div>
-<script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-const root=document.getElementById('game'),loading=document.getElementById('loading'),hud=document.getElementById('hud');
-try{
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x8fcbdc);scene.fog=new THREE.FogExp2(0x9fcbd0,.000105);
-const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,12000);
-const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',stencil:false});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.BasicShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.setClearColor(0x9bc9d4,1);renderer.domElement.style.imageRendering='auto';root.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xc8e8ff,0x38513a,1.7));
-// Visible tropical sun with a soft atmospheric halo; the directional light follows the same direction.
-const sunDirection=new THREE.Vector3(-.48,.34,-.81).normalize();
-const sunLight=new THREE.DirectionalLight(0xffe5b5,3.15);
-sunLight.position.copy(sunDirection).multiplyScalar(900);
-sunLight.castShadow=true;sunLight.shadow.mapSize.set(1024,1024);
-sunLight.shadow.camera.left=-320;sunLight.shadow.camera.right=320;
-sunLight.shadow.camera.top=320;sunLight.shadow.camera.bottom=-320;
-sunLight.shadow.bias=-.00025;scene.add(sunLight);
-const sunDisk=new THREE.Mesh(new THREE.SphereGeometry(92,32,24),new THREE.MeshBasicMaterial({color:0xffedbd}));
-sunDisk.position.copy(sunDirection).multiplyScalar(4800);scene.add(sunDisk);
-const glowCanvas=document.createElement('canvas');glowCanvas.width=glowCanvas.height=256;
-const glowCtx=glowCanvas.getContext('2d'),glowGrad=glowCtx.createRadialGradient(128,128,8,128,128,126);
-glowGrad.addColorStop(0,'rgba(255,238,190,0.72)');glowGrad.addColorStop(.22,'rgba(255,219,150,0.28)');glowGrad.addColorStop(1,'rgba(255,205,130,0)');
-glowCtx.fillStyle=glowGrad;glowCtx.fillRect(0,0,256,256);
-const sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(glowCanvas),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
-sunGlow.position.copy(sunDisk.position);sunGlow.scale.set(780,780,1);scene.add(sunGlow);
-// One instanced cloud layer: soft clusters of low-poly cumulus puffs, drifting slowly over the island.
-const cloudGeo=new THREE.SphereGeometry(1,10,7);
-const cloudMat=new THREE.MeshStandardMaterial({color:0xf2f5f1,roughness:1,metalness:0});
-const clouds=new THREE.InstancedMesh(cloudGeo,cloudMat,180);
-const cloudDummy=new THREE.Object3D();let cloudIndex=0;
-for(let c=0;c<24;c++){
- const cx=(Math.random()-.5)*5200,cz=(Math.random()-.5)*5200,baseY=300+Math.random()*210;
- const puffs=6+Math.floor(Math.random()*3);
- for(let p=0;p<puffs;p++){
-  const a=p/puffs*Math.PI*2,rad=35+Math.random()*75;
-  cloudDummy.position.set(cx+Math.cos(a)*rad,baseY+(Math.random()-.5)*34,cz+Math.sin(a)*rad);
-  const size=38+Math.random()*58;
-  cloudDummy.scale.set(size*(1.1+Math.random()*.7),size*(.42+Math.random()*.35),size);
-  cloudDummy.rotation.set(0,Math.random()*Math.PI,0);cloudDummy.updateMatrix();
-  clouds.setMatrixAt(cloudIndex++,cloudDummy.matrix);
- }
+<div class="section"><h2>ПРОДАЖА РУДЫ</h2><span>УГОЛЬ · БАЗОВЫЙ РЕСУРС</span></div>
+<div class="upgrade"><div class="ico">◆</div><div class="info"><b>Продать добытый уголь</b><small>Получайте деньги за каждую единицу ресурса</small></div><button class="buy" id="sell">ПРОДАТЬ</button></div>
+<div class="footer">SHOHIN TAJIKISTAN · GAME PROTOTYPE</div>
+</main>
+<script>
+(()=>{
+const defaults={cash:250,ore:0,minerLv:1,liftLv:1,storeLv:1,last:Date.now()};
+let s;try{s={...defaults,...JSON.parse(localStorage.getItem('shohinMinerSave')||'{}')}}catch{s={...defaults}}
+const $=id=>document.getElementById(id);
+const cost={miner:()=>Math.floor(50*Math.pow(1.65,s.minerLv-1)),lift:()=>Math.floor(75*Math.pow(1.7,s.liftLv-1)),store:()=>Math.floor(60*Math.pow(1.6,s.storeLv-1))};
+const capacity=()=>100+(s.storeLv-1)*75;
+const rate=()=>s.minerLv*3;
+const fmt=n=>Math.floor(n).toLocaleString('en-US');
+function save(){s.last=Date.now();localStorage.setItem('shohinMinerSave',JSON.stringify(s))}
+function render(){
+$('cash').textContent='$ '+fmt(s.cash);$('oreCount').textContent=fmt(s.ore);$('capacity').textContent=fmt(capacity());
+$('rate').textContent=rate();$('profit').textContent='$ '+rate();$('miners').textContent=(2+s.minerLv)+' / '+(2+s.minerLv);
+$('mineLevel').textContent=s.minerLv;$('minerLv').textContent=s.minerLv;$('liftLv').textContent=s.liftLv;$('storeLv').textContent=s.storeLv;
+[['minerBuy','miner'],['liftBuy','lift'],['storeBuy','store']].forEach(([id,k])=>{$(id).textContent='$ '+fmt(cost[k]());$(id).disabled=s.cash<cost[k]()});
+$('sell').disabled=s.ore<1;
 }
-clouds.count=cloudIndex;clouds.instanceMatrix.needsUpdate=true;clouds.frustumCulled=false;scene.add(clouds);
-// High-quality tropical ocean: shallow turquoise shelf, deep offshore blue, moving multi-scale waves and scrolling micro-ripples.
-function makeWaterNormal(){
- const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d'),im=ctx.createImageData(256,256);
- for(let y=0;y<256;y++)for(let x=0;x<256;x++){
-  const i=(y*256+x)*4;
-  const n=128+Math.sin(x*.16+Math.sin(y*.075)*2.2)*24+Math.cos(y*.21+x*.055)*19+Math.sin((x+y)*.31)*8;
-  im.data[i]=n;im.data[i+1]=n;im.data[i+2]=255;im.data[i+3]=255;
- }
- ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(115,115);t.colorSpace=THREE.NoColorSpace;return t;
-}
-const oceanNormal=makeWaterNormal();
-const seaGeo=new THREE.PlaneGeometry(16000,16000,240,240);
-const seaColors=[],shallow=new THREE.Color(0x35b9ad),reef=new THREE.Color(0x087f91),deep=new THREE.Color(0x063c59);
-const seaPos=seaGeo.attributes.position;
-for(let i=0;i<seaPos.count;i++){
- const d=Math.hypot(seaPos.getX(i),seaPos.getY(i));
- const c=d<2550?shallow.clone().lerp(reef,THREE.MathUtils.smoothstep(d,1850,2550)):reef.clone().lerp(deep,THREE.MathUtils.smoothstep(d,2550,7200));
- const sparkle=(Math.sin(seaPos.getX(i)*.013+seaPos.getY(i)*.009)*.5+.5)*.025;
- c.offsetHSL(0,0,sparkle);seaColors.push(c.r,c.g,c.b);
-}
-seaGeo.setAttribute('color',new THREE.Float32BufferAttribute(seaColors,3));
-const seaMat=new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.16,metalness:.04,clearcoat:1,clearcoatRoughness:.075,normalMap:oceanNormal,normalScale:new THREE.Vector2(.42,.42)});
-seaMat.onBeforeCompile=(shader)=>{
- shader.uniforms.uOceanTime={value:0};
- shader.vertexShader='uniform float uOceanTime;\n'+shader.vertexShader;
- shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
- float oceanX=position.x;
- float oceanZ=position.y;
- float swell=sin(oceanX*0.0024+uOceanTime*0.72)*0.62
-            +sin(oceanZ*0.0031-uOceanTime*0.58)*0.34
-            +sin((oceanX+oceanZ)*0.006+uOceanTime*1.15)*0.13;
- transformed.z += swell;
- `);
- seaMat.userData.shader=shader;
-};
-const sea=new THREE.Mesh(seaGeo,seaMat);sea.rotation.x=-Math.PI/2;sea.position.y=-2.8;scene.add(sea);
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function hash(x,z){let n=Math.sin(x*127.1+z*311.7)*43758.5453;return n-Math.floor(n)}
-function noise(x,z){let ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz;fx=fx*fx*(3-2*fx);fz=fz*fz*(3-2*fz);return THREE.MathUtils.lerp(THREE.MathUtils.lerp(hash(ix,iz),hash(ix+1,iz),fx),THREE.MathUtils.lerp(hash(ix,iz+1),hash(ix+1,iz+1),fx),fz)}
-function heightAt(x,z){
- const u=x/10,v=z/10,r=Math.sqrt(u*u+v*v),edge=clamp((242-r)/52,0,1);if(edge<=0)return -8;
- const n=noise(u*.035,v*.035)*14+noise(u*.09+30,v*.09-20)*4.2;
- const ridge=Math.max(0,1-Math.sqrt((u+55)**2/15000+(v-45)**2/19000));
- const ridge2=Math.max(0,1-Math.sqrt((u-85)**2/8500+(v+65)**2/11000));
- const central=Math.pow(ridge,1.6)*155+Math.pow(ridge2,1.7)*112;
- const peaks=Math.pow(Math.max(0,Math.sin(u*.018+v*.012)*Math.cos(v*.021-u*.009)),3)*22;
- return Math.max(-8,(7+n+central+peaks)*edge-3);
-}
-const N=240,size=5000,positions=[],colors=[],indices=[];
-const colorLow=new THREE.Color(0xc1ad78),colorGrass=new THREE.Color(0x47794a),colorForest=new THREE.Color(0x254e36),colorRock=new THREE.Color(0x777b75),colorSnow=new THREE.Color(0xe4e9e3);
-for(let iz=0;iz<=N;iz++)for(let ix=0;ix<=N;ix++){
- const x=(ix/N-.5)*size,z=(iz/N-.5)*size,y=heightAt(x,z);positions.push(x,y,z);
- let c;if(y<2)c=colorLow.clone().lerp(colorGrass,clamp((y+2)/4,0,1));else if(y<34)c=colorGrass.clone().lerp(colorForest,clamp((y-2)/32,0,1));else if(y<92)c=colorForest.clone().lerp(colorRock,clamp((y-34)/58,0,1));else c=colorRock.clone().lerp(colorSnow,clamp((y-92)/34,0,1));
- const variation=(noise(x*.17,z*.17)-.5)*.12;c.offsetHSL(0,0,variation);colors.push(c.r,c.g,c.b);
- if(ix<N&&iz<N){const a=iz*(N+1)+ix,b=a+1,c=a+N+1,d=c+1;indices.push(a,c,b,b,c,d)}
-}
-const terrainGeo=new THREE.BufferGeometry();terrainGeo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));terrainGeo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));terrainGeo.setIndex(indices);terrainGeo.computeVertexNormals();
-// Procedural fine-grain surface maps add texture to the island instead of flat colour.
-function makeGroundMaps(){
- const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d'),im=x.createImageData(256,256);
- for(let y=0;y<256;y++)for(let xx=0;xx<256;xx++){const i=(y*256+xx)*4,n=105+Math.random()*95;im.data[i]=n;im.data[i+1]=n;im.data[i+2]=n;im.data[i+3]=255}
- x.putImageData(im,0,0);const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(32,32);tex.colorSpace=THREE.NoColorSpace;return tex;
-}
-const groundBump=makeGroundMaps();
-// Wet-clay surface: mottled roughness with irregular smooth patches that catch the tropical sunlight.
-function makeWetClayRoughness(){
- const c=document.createElement('canvas');c.width=c.height=512;
- const ctx=c.getContext('2d'),im=ctx.createImageData(512,512);
- for(let y=0;y<512;y++)for(let x=0;x<512;x++){
-  const i=(y*512+x)*4;
-  const broad=Math.sin(x*.026+Math.sin(y*.018)*2.4)*Math.cos(y*.031-x*.009);
-  const medium=Math.sin(x*.11+y*.047)*.5+Math.cos(y*.095-x*.063)*.35;
-  const fine=(Math.random()-.5)*.24;
-  const wet=Math.max(0,Math.sin(x*.014+Math.cos(y*.012)*2.1)*Math.cos(y*.019-x*.008));
-  const value=THREE.MathUtils.clamp(154+broad*30+medium*22+fine*75-wet*72,48,225);
-  im.data[i]=im.data[i+1]=im.data[i+2]=value;im.data[i+3]=255;
- }
- ctx.putImageData(im,0,0);
- // Fine irregular dry ridges between the smoother, wetter clay patches.
- ctx.globalAlpha=.16;ctx.strokeStyle='#eeeeee';ctx.lineWidth=1;
- for(let n=0;n<85;n++){
-  let x=Math.random()*512,y=Math.random()*512;ctx.beginPath();ctx.moveTo(x,y);
-  for(let k=0;k<4;k++){x+=(Math.random()-.5)*22;y+=Math.random()*13;ctx.lineTo(x,y)}
-  ctx.stroke();
- }
- const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(24,24);tex.colorSpace=THREE.NoColorSpace;return tex;
-}
-const wetClayRoughness=makeWetClayRoughness();
-const terrainMat=new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.46,roughnessMap:wetClayRoughness,clearcoat:.62,clearcoatRoughness:.24,bumpMap:groundBump,bumpScale:1.2});
-const terrain=new THREE.Mesh(terrainGeo,terrainMat);terrain.receiveShadow=true;terrain.castShadow=true;scene.add(terrain);
-
-// CHINESE KARST MOUNTAIN RANGE: tall limestone towers with fluted cliff faces.
-const karstMat=new THREE.MeshStandardMaterial({color:0x777d72,roughness:.94,vertexColors:true});
-const karstGreen=new THREE.MeshStandardMaterial({color:0x315b3b,roughness:1});
-function makeKarstPeak(cx,cz,height,baseRadius,seed){
- const rings=12,segments=24,verts=[],cols=[],inds=[];
- const topY=heightAt(cx,cz);
- for(let j=0;j<=rings;j++){
-  const t=j/rings;
-  for(let i=0;i<=segments;i++){
-   const a=i/segments*Math.PI*2;
-   const ridge=.78+.22*Math.sin(a*5+seed)*Math.sin(a*2+seed*.7);
-   const noiseR=1+.10*Math.sin(a*9+seed*2)+.045*Math.cos(a*13-seed);
-   const taper=Math.pow(1-t,.58);
-   const radius=baseRadius*taper*ridge*noiseR*(.92+.08*Math.sin(t*17+seed));
-   const y=topY+height*t+(j===rings?Math.sin(a*3+seed)*height*.025:0);
-   verts.push(cx+Math.cos(a)*radius,y,cz+Math.sin(a)*radius);
-   const rock=new THREE.Color(0x777d72).lerp(new THREE.Color(0x405b43),clamp((noise(cx*.01+Math.cos(a)*radius*.01,cz*.01+Math.sin(a)*radius*.01)-.25)*.55,0,.45));
-   const shade=.88+.12*Math.sin(a*7+seed);rock.multiplyScalar(shade);cols.push(rock.r,rock.g,rock.b);
-   if(j<rings&&i<segments){const q=j*(segments+1)+i;inds.push(q,q+segments+1,q+1,q+1,q+segments+1,q+segments+2)}
-  }
- }
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));g.setIndex(inds);g.computeVertexNormals();
- const peak=new THREE.Mesh(g,karstMat);peak.castShadow=true;peak.receiveShadow=true;scene.add(peak);
- // Broken green ledges cling to selected lower cliff shelves.
- for(let k=0;k<3;k++){const y=topY+height*(.18+k*.16),r=baseRadius*(1-k*.16);const shelf=new THREE.Mesh(new THREE.DodecahedronGeometry(r*.66,1),karstGreen);shelf.scale.set(1,.10,1);shelf.position.set(cx,y,cz);shelf.rotation.y=seed+k;scene.add(shelf)}
-}
-[
- [-720,120,390,112,1],[-490,410,470,128,2],[-170,560,430,118,3],
- [180,420,520,138,4],[510,260,410,112,5],[760,610,360,105,6],
- [-850,760,330,96,7],[360,850,390,108,8]
-].forEach(p=>makeKarstPeak(...p));
-// Narrow vertical cascades on the cliff faces, with turquoise plunge pools below.
-const cascadeMat=new THREE.MeshPhysicalMaterial({color:0xc9f7f4,transparent:true,opacity:.82,roughness:.1,metalness:.04,clearcoat:1,side:THREE.DoubleSide,emissive:0x174c50,depthWrite:false});
-function makeCascade(x,z,top,bottom,width,turn){
- const group=new THREE.Group();
- const geo=new THREE.PlaneGeometry(width,top-bottom,4,28);
- const pos=geo.attributes.position;
- for(let i=0;i<pos.count;i++){const wave=Math.sin((pos.getY(i)+top)*.075+turn)*.9;pos.setX(i,pos.getX(i)+wave)}
- geo.computeVertexNormals();
- const sheet=new THREE.Mesh(geo,cascadeMat);sheet.position.y=(top+bottom)/2;group.add(sheet);
- group.position.set(x,bottom,z);group.rotation.y=turn;scene.add(group);
- const pool=new THREE.Mesh(new THREE.CircleGeometry(width*1.45,28),new THREE.MeshPhysicalMaterial({color:0x43c6c9,transparent:true,opacity:.72,roughness:.16,clearcoat:1}));
- pool.rotation.x=-Math.PI/2;pool.position.set(x,bottom+.8,z+16);scene.add(pool);
- return sheet;
-}
-makeCascade(-490,410,420,205,34,.35);
-makeCascade(-170,560,390,180,29,-.25);
-makeCascade(180,420,485,210,38,.18);
-makeCascade(510,260,365,155,27,-.4);
-
-// Ultra-dense island grass: 560,000 lightweight instanced blades, without per-blade shadows.
-const grassGeo=new THREE.PlaneGeometry(.24,1.25,1,1);
-grassGeo.translate(0,.625,0);
-const grassMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,side:THREE.DoubleSide});
-// Mobile-friendly grass: keep the green slopes filled without overwhelming phone memory.
-const GRASS_MAX=90000;
-const grass=new THREE.InstancedMesh(grassGeo,grassMat,GRASS_MAX);
-grass.frustumCulled=false;
-const grassDummy=new THREE.Object3D(),grassColor=new THREE.Color();
-let grassCount=0,grassTries=0;
-while(grassCount<GRASS_MAX&&grassTries<650000){
- grassTries++;
- const gx=(Math.random()-.5)*4400,gz=(Math.random()-.5)*4400,gy=heightAt(gx,gz);
- // Cover green slopes and valleys; preserve pale beaches and exposed high rocky peaks.
- if(gy<3.2||gy>78||Math.hypot(gx,gz)>2220)continue;
- const h=.62+Math.random()*1.18,w=.62+Math.random()*.82;
- grassDummy.position.set(gx,gy+.035,gz);
- grassDummy.rotation.set((Math.random()-.5)*.16,Math.random()*Math.PI*2,(Math.random()-.5)*.16);
- grassDummy.scale.set(w,h,1);grassDummy.updateMatrix();
- grass.setMatrixAt(grassCount,grassDummy.matrix);
- const shade=Math.random();
- grassColor.set(shade<.22?0x2d6533:shade<.68?0x438638:shade<.9?0x609d3e:0x83ae50);
- grass.setColorAt(grassCount,grassColor);
- grassCount++;
-}
-grass.count=grassCount;grass.instanceMatrix.needsUpdate=true;
-if(grass.instanceColor)grass.instanceColor.needsUpdate=true;
-grass.receiveShadow=false;grass.castShadow=false;scene.add(grass);
-// Shoreline sand coves
-const sandMat=new THREE.MeshStandardMaterial({color:0xd8c18a,roughness:1,bumpMap:groundBump,bumpScale:.55});
-for(let i=0;i<8;i++){const a=i*Math.PI/4+.2,x=Math.cos(a)*1900,z=Math.sin(a)*1900;const patch=new THREE.Mesh(new THREE.CircleGeometry(190,32),sandMat);patch.rotation.x=-Math.PI/2;patch.rotation.z=-a;patch.position.set(x,heightAt(x,z)+.22,z);patch.scale.set(1.5,.75,1);scene.add(patch)}
-// Instanced forests: tree counts tuned for mobile
-const trunkGeo=new THREE.CylinderGeometry(.35,.55,5,6),leafGeo=new THREE.ConeGeometry(3.2,11,7);
-const trunkMat=new THREE.MeshStandardMaterial({color:0x63452d,roughness:1}),leafMat=new THREE.MeshStandardMaterial({color:0x245a39,roughness:.95});
-const trunks=new THREE.InstancedMesh(trunkGeo,trunkMat,7800),leaves=new THREE.InstancedMesh(leafGeo,leafMat,7800);trunks.castShadow=true;leaves.castShadow=true;
-const dummy=new THREE.Object3D();let count=0,tries=0;
-while(count<7800&&tries<78000){tries++;const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<4||y>145||Math.sqrt(x*x+z*z)>2220)continue;
-const s=.7+Math.random()*.9;dummy.position.set(x,y+2.4*s,z);dummy.rotation.y=Math.random()*6.28;dummy.scale.set(s,s,s);dummy.updateMatrix();trunks.setMatrixAt(count,dummy.matrix);
-dummy.position.y=y+7*s;dummy.scale.set(s,s,s);dummy.updateMatrix();leaves.setMatrixAt(count,dummy.matrix);count++}
-trunks.count=count;leaves.count=count;scene.add(trunks,leaves);
-
-// Tropical palms: curved trunks and individually shaped radial fronds, instanced for mobile performance.
-function makePalmFrond(){
- const g=new THREE.BufferGeometry(),v=[],idx=[];
- const rows=12,cols=4;
- for(let i=0;i<=rows;i++){const t=i/rows,half=Math.sin(Math.PI*t)*.72*(1-.22*t);for(let j=0;j<=cols;j++){const u=j/cols*2-1;v.push(u*half,t*7.2,-t*t*1.35-Math.abs(u)*.12)}}
- for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){const a=i*(cols+1)+j,b=a+1,c=a+cols+1,d=c+1;idx.push(a,c,b,b,c,d)}
- g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();return g;
-}
-const palmTrunkGeo=new THREE.CylinderGeometry(.2,.48,10,8,5);
-const palmTrunkMat=new THREE.MeshStandardMaterial({color:0x80603b,roughness:1});
-const palmFrondGeo=makePalmFrond();
-const palmLeafMat=new THREE.MeshStandardMaterial({color:0x287c43,roughness:.88,side:THREE.DoubleSide});
-const PALM_COUNT=1080,FRONDS=8;
-const palmTrunks=new THREE.InstancedMesh(palmTrunkGeo,palmTrunkMat,PALM_COUNT);
-const palmFronds=new THREE.InstancedMesh(palmFrondGeo,palmLeafMat,PALM_COUNT*FRONDS);
-palmTrunks.castShadow=true;palmFronds.castShadow=true;
-let pc=0;
-for(let i=0;i<PALM_COUNT;i++){
- const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);
- if(y<0||y>38||Math.hypot(x,z)>2240)continue;
- const sc=.72+Math.random()*.72,lean=(Math.random()-.5)*.12;
- dummy.position.set(x+lean*5,y+5*sc,z);dummy.rotation.set(lean,Math.random()*6.28,lean*.5);dummy.scale.set(sc,sc,sc);dummy.updateMatrix();palmTrunks.setMatrixAt(pc,dummy.matrix);
- for(let k=0;k<FRONDS;k++){dummy.position.set(x+lean*10,y+9.6*sc,z);dummy.rotation.set(-.22+Math.random()*.12,k/FRONDS*Math.PI*2,Math.random()*.10-.05);dummy.scale.set(sc*(.92+Math.random()*.18),sc,sc);dummy.updateMatrix();palmFronds.setMatrixAt(pc*FRONDS+k,dummy.matrix)}
- pc++;
-}
-palmTrunks.count=pc;palmFronds.count=pc*FRONDS;scene.add(palmTrunks,palmFronds);
-const bushGeo=new THREE.IcosahedronGeometry(1.8,1),bushMat=new THREE.MeshStandardMaterial({color:0x347442,roughness:1});
-const bushes=new THREE.InstancedMesh(bushGeo,bushMat,2400);let bc=0;
-for(let i=0;i<2400;i++){const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<3||y>110||Math.hypot(x,z)>2200)continue;const sc=.7+Math.random()*2;dummy.position.set(x,y+sc,z);dummy.rotation.set(Math.random(),Math.random()*6,Math.random());dummy.scale.set(sc*1.3,sc*.65,sc);dummy.updateMatrix();bushes.setMatrixAt(bc++,dummy.matrix)}
-bushes.count=bc;scene.add(bushes);
-
-// Real CC0 glTF assets: loaded once, then cloned for mobile-friendly reuse.
-const gltfLoader=new GLTFLoader();
-function loadIslandAsset(url, placements, options={}){
- gltfLoader.load(url,(gltf)=>{
-  const source=gltf.scene;
-  source.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
-  for(const p of placements){
-   const obj=source.clone(true);
-   const s=p.scale||1;
-   obj.scale.setScalar(s);
-   obj.position.set(p.x,heightAt(p.x,p.z)+ (p.lift||0),p.z);
-   obj.rotation.y=p.rotation||0;
-   scene.add(obj);
-  }
- },undefined,err=>console.warn('SHOHIN asset load failed:',url,err));
-}
-// Dense tropical buttress trees for the interior forest.
-loadIslandAsset('https://cdn.3dassets.dev/assets/6818/v1/model.glb',[
- {x:-260,z:220,scale:1.0},{x:180,z:360,scale:.9},{x:420,z:-160,scale:1.05},
- {x:-520,z:-260,scale:.85},{x:760,z:420,scale:1.0},{x:-820,z:180,scale:.9},
- {x:960,z:-520,scale:.95},{x:-1080,z:-640,scale:1.0}
-]);
-// Branched tropical screwpine, a distinct shoreline and jungle species.
-loadIslandAsset('https://cdn.3dassets.dev/assets/6804/v1/model.glb',[
- {x:-1450,z:820,scale:1.35},{x:-1580,z:920,scale:1.2},{x:1480,z:-980,scale:1.3},
- {x:1620,z:-850,scale:1.15},{x:1180,z:1220,scale:1.25}
-]);
-// Coastal cave landmark, placed on the outer shore.
-loadIslandAsset('https://cdn.3dassets.dev/assets/6855/v1/model.glb',[
- {x:2050,z:260,scale:1.15,rotation:Math.PI*.5}
-]);
-// Beach debris and palm stumps for small environmental detail.
-loadIslandAsset('https://cdn.3dassets.dev/assets/6837/v1/model.glb',[
- {x:-1820,z:-420,scale:1.0,rotation:.7},{x:1760,z:620,scale:.9,rotation:2.1}
-]);
-loadIslandAsset('https://cdn.3dassets.dev/assets/6801/v1/model.glb',[
- {x:-1710,z:-520,scale:1.0},{x:1690,z:700,scale:1.1}
-]);
-// Natural shoreline cove asset: sand-to-water transition, broken foam, dune grass, boardwalk, shells and coastal rocks.
-// Source: 3DAssets.dev / Beach Surf and Paddle Kit — Surf Cove Base (CC0, 15,752 triangles).
-loadIslandAsset('https://cdn.3dassets.dev/assets/39464/v1/model.glb',[
- {x:1840,z:0,scale:5.6,lift:.35,rotation:Math.PI*.18}
-]);
-// scattered boulders
-const rockGeo=new THREE.DodecahedronGeometry(2.5,0),rockMat=new THREE.MeshStandardMaterial({color:0x777a73,roughness:1});const rocks=new THREE.InstancedMesh(rockGeo,rockMat,900);let rc=0;
-for(let i=0;i<900;i++){const x=(Math.random()-.5)*4200,z=(Math.random()-.5)*4200,y=heightAt(x,z);if(y<3)continue;dummy.position.set(x,y+1,z);dummy.rotation.set(Math.random(),Math.random()*6,Math.random());const s=.4+Math.random()*2.4;dummy.scale.set(s,s*.6,s);dummy.updateMatrix();rocks.setMatrixAt(rc++,dummy.matrix)}rocks.count=rc;rocks.castShadow=true;scene.add(rocks);
-// River ribbon descending from high valley toward coast
-function makeRiver(points,width,material){const verts=[],idx=[];for(let i=0;i<points.length;i++){const p=points[i],prev=points[Math.max(0,i-1)],next=points[Math.min(points.length-1,i+1)],dx=next[0]-prev[0],dz=next[1]-prev[1],len=Math.hypot(dx,dz)||1,nx=-dz/len,nz=dx/len,y=heightAt(p[0],p[1])+.35;verts.push(p[0]+nx*width,y,p[1]+nz*width,p[0]-nx*width,y,p[1]-nz*width);if(i<points.length-1){const a=i*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(idx);g.computeVertexNormals();const m=new THREE.Mesh(g,material);scene.add(m)}
-const riverMat=new THREE.MeshStandardMaterial({color:0x42b7c3,roughness:.18,metalness:.15,transparent:true,opacity:.88,side:THREE.DoubleSide});
-makeRiver([[-480,-180],[-350,100],[-220,380],[-40,670],[180,920],[350,1220],[600,1500],[880,1740],[1180,1940]],35,riverMat);
-makeRiver([[580,-800],[400,-550],[220,-320],[80,-80],[-80,160],[-200,420]],22,riverMat);
-// waterfall in mountain valley
-const waterfall=new THREE.Mesh(new THREE.PlaneGeometry(130,250,8,24),new THREE.MeshPhysicalMaterial({color:0xb8f4f4,transparent:true,opacity:.78,roughness:.12,metalness:.08,clearcoat:1,side:THREE.DoubleSide,emissive:0x16434a}));waterfall.position.set(-40,155,680);waterfall.rotation.y=.15;scene.add(waterfall);
-// soft clouds using translucent flattened spheres
-const cloudMat=new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.48,roughness:1,depthWrite:false});
-for(let i=0;i<22;i++){const g=new THREE.Group();for(let j=0;j<4;j++){const puff=new THREE.Mesh(new THREE.SphereGeometry(1,9,7),cloudMat);puff.position.set((j-1.5)*8,Math.random()*3,Math.random()*4);puff.scale.set(8+Math.random()*5,2.4+Math.random()*1.6,4+Math.random()*3);g.add(puff)}g.position.set((Math.random()-.5)*7000,280+Math.random()*180,(Math.random()-.5)*7000);scene.add(g)}
-// HD BEACH SET: detailed procedural beach furniture, umbrellas, timber cabanas and coastal props.
-// Built from subdivided Three.js geometry and PBR materials; instanced-friendly, no paid API.
-const beachRoot=new THREE.Group();scene.add(beachRoot);
-const woodMat=new THREE.MeshStandardMaterial({color:0x98704a,roughness:.86});
-const paleWoodMat=new THREE.MeshStandardMaterial({color:0xc49a68,roughness:.82});
-const fabricMat=new THREE.MeshStandardMaterial({color:0xf4ead2,roughness:.92,side:THREE.DoubleSide});
-const tealFabricMat=new THREE.MeshStandardMaterial({color:0x168b83,roughness:.88,side:THREE.DoubleSide});
-const ropeMat=new THREE.MeshStandardMaterial({color:0xe3c99c,roughness:1});
-const coralMats=[0xd77d66,0xe8a36e,0x9d718f].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.9}));
-const shellMat=new THREE.MeshStandardMaterial({color:0xf2dfbd,roughness:.7});
-function beachPlace(obj,x,z,rot=0,lift=0){obj.position.set(x,heightAt(x,z)+lift,z);obj.rotation.y=rot;beachRoot.add(obj);return obj}
-function makeUmbrella(x,z,rot,colorMat){
- const g=new THREE.Group();
- const pole=new THREE.Mesh(new THREE.CylinderGeometry(.075,.11,3.5,12),woodMat);pole.position.y=1.75;pole.castShadow=true;g.add(pole);
- const cap=new THREE.Group();cap.position.y=3.35;
- const canopy=new THREE.Mesh(new THREE.ConeGeometry(2.35,.9,32,4,true),colorMat);canopy.position.y=.18;canopy.scale.y=1.1;canopy.castShadow=true;cap.add(canopy);
- const rim=new THREE.Mesh(new THREE.TorusGeometry(2.28,.045,6,48),colorMat);rim.rotation.x=Math.PI/2;rim.position.y=-.23;cap.add(rim);
- for(let k=0;k<8;k++){const a=k*Math.PI/4;const rib=new THREE.Mesh(new THREE.CylinderGeometry(.018,.025,2.25,5),ropeMat);rib.position.set(Math.cos(a)*1.1,-.03,Math.sin(a)*1.1);rib.rotation.z=Math.cos(a)*-.22;rib.rotation.x=Math.sin(a)*.22;cap.add(rib)}
- g.add(cap);beachPlace(g,x,z,rot);return g;
-}
-function makeLounger(x,z,rot){
- const g=new THREE.Group();
- const frame=new THREE.Mesh(new THREE.BoxGeometry(1.15,.12,2.55),paleWoodMat);frame.position.y=.48;frame.castShadow=true;g.add(frame);
- for(const side of [-.48,.48]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,.62,8),woodMat);leg.position.set(side,.25,.2);leg.rotation.x=.18;g.add(leg);const back=new THREE.Mesh(new THREE.BoxGeometry(.09,1.05,.1),woodMat);back.position.set(side,.83,-.75);back.rotation.x=-.38;g.add(back)}
- const bed=new THREE.Mesh(new THREE.BoxGeometry(1.04,.12,2.35),fabricMat);bed.position.set(0,.58,0);g.add(bed);
- const backPad=new THREE.Mesh(new THREE.BoxGeometry(1.02,.1,1.12),tealFabricMat);backPad.position.set(0,.98,-.68);backPad.rotation.x=-.38;g.add(backPad);
- for(let i=0;i<5;i++){const slat=new THREE.Mesh(new THREE.BoxGeometry(1.08,.055,.12),paleWoodMat);slat.position.set(0,.43,.62+i*.2);g.add(slat)}
- beachPlace(g,x,z,rot);return g;
-}
-function makeCabana(x,z,rot){
- const g=new THREE.Group();
- for(const px of [-2.3,2.3])for(const pz of [-1.8,1.8]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.13,.17,3.6,10),woodMat);post.position.set(px,1.8,pz);post.castShadow=true;g.add(post)}
- const roofGeo=new THREE.ConeGeometry(3.65,1.65,4);const roof=new THREE.Mesh(roofGeo,new THREE.MeshStandardMaterial({color:0x9a7650,roughness:1}));roof.position.y=4.1;roof.rotation.y=Math.PI/4;roof.scale.set(1,1,0.78);roof.castShadow=true;g.add(roof);
- for(let i=0;i<11;i++){const thatch=new THREE.Mesh(new THREE.CylinderGeometry(.025,.045,4.5,5),ropeMat);const a=i/11*Math.PI*2;thatch.position.set(Math.cos(a)*1.8,3.35,Math.sin(a)*1.8);thatch.rotation.z=Math.cos(a)*.35;thatch.rotation.x=-Math.sin(a)*.35;g.add(thatch)}
- const bench=new THREE.Mesh(new THREE.BoxGeometry(2.8,.18,.55),paleWoodMat);bench.position.set(0,.75,1.15);g.add(bench);
- beachPlace(g,x,z,rot);return g;
-}
-function makeCoastalRock(x,z,scale,seed){
- const geo=new THREE.IcosahedronGeometry(1,3);
- const p=geo.attributes.position;for(let i=0;i<p.count;i++){const v=new THREE.Vector3().fromBufferAttribute(p,i);const f=1+.12*Math.sin(v.x*9+seed)*Math.cos(v.z*8-seed);v.multiplyScalar(f);p.setXYZ(i,v.x,v.y,v.z)}geo.computeVertexNormals();
- const mat=new THREE.MeshStandardMaterial({color:seed%2?0x777b72:0x8d877b,roughness:1});
- const rock=new THREE.Mesh(geo,mat);rock.scale.set(scale*1.3,scale*.72,scale);rock.castShadow=true;beachPlace(rock,x,z,seed*.2,scale*.45);
-}
-function makeCoral(x,z,scale,index){
- const g=new THREE.Group(),mat=coralMats[index%coralMats.length];
- for(let j=0;j<5;j++){const h=scale*(.45+Math.random()*.8),branch=new THREE.Mesh(new THREE.CylinderGeometry(.045*scale,.13*scale,h,7),mat);branch.position.set((Math.random()-.5)*scale*.7,h*.48,(Math.random()-.5)*scale*.7);branch.rotation.z=(Math.random()-.5)*.7;branch.rotation.x=(Math.random()-.5)*.7;branch.castShadow=true;g.add(branch)}
- beachPlace(g,x,z,Math.random()*6.28,.08);
-}
-function makeShell(x,z,rot){const g=new THREE.Group();const shell=new THREE.Mesh(new THREE.SphereGeometry(.22,18,12,0,Math.PI*2,0,Math.PI*.55),shellMat);shell.scale.set(1.3,.5,.85);shell.rotation.x=-.2;g.add(shell);for(let i=-2;i<=2;i++){const ridge=new THREE.Mesh(new THREE.TorusGeometry(.12+Math.abs(i)*.018,.012,5,18,Math.PI),ropeMat);ridge.position.x=i*.055;ridge.rotation.x=Math.PI/2;g.add(ridge)}beachPlace(g,x,z,rot,.12)}
-// Main tropical cove: beach umbrellas and loungers placed above the sand surface.
-makeUmbrella(1740,115,0,fabricMat);makeUmbrella(1910,-170,.6,tealFabricMat);makeUmbrella(1600,-260,-.4,fabricMat);
-makeLounger(1760,210,.12);makeLounger(1830,210,-.12);makeLounger(1940,-80,.5);makeLounger(1995,-80,.5);
-makeCabana(1510,350,-.3);makeCabana(2110,260,.9);
-for(let i=0;i<34;i++){const a=Math.random()*Math.PI*2,r=150+Math.random()*430,x=1840+Math.cos(a)*r,z=Math.sin(a)*r;if(heightAt(x,z)>2&&heightAt(x,z)<25)makeCoastalRock(x,z,.7+Math.random()*2,i)}
-for(let i=0;i<18;i++){const a=Math.random()*Math.PI*2,r=240+Math.random()*360;makeCoral(1840+Math.cos(a)*r,Math.sin(a)*r,.5+Math.random()*.8,i)}
-for(let i=0;i<48;i++){const a=Math.random()*Math.PI*2,r=80+Math.random()*390;const x=1840+Math.cos(a)*r,z=Math.sin(a)*r;if(heightAt(x,z)<12)makeShell(x,z,Math.random()*6.28)}
-
-// Player
-const player=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(1.15,3.2,4,8),new THREE.MeshStandardMaterial({color:0x173f31,roughness:.8}));body.position.y=3;body.castShadow=true;player.add(body);
-const head=new THREE.Mesh(new THREE.SphereGeometry(.85,12,10),new THREE.MeshStandardMaterial({color:0xc99570,roughness:.8}));head.position.y=5.4;head.castShadow=true;player.add(head);
-const pack=new THREE.Mesh(new THREE.BoxGeometry(1.5,2,1),new THREE.MeshStandardMaterial({color:0x9a7b36,roughness:1}));pack.position.set(0,3.3,-.95);player.add(pack);player.position.set(0,heightAt(0,0),-120);scene.add(player);
-let yaw=0,pitch=.18,third=true,overview=false,vy=0,onGround=true;const move={x:0,y:0};let last=performance.now();const overviewTarget=new THREE.Vector3(0,0,0);let overviewDistance=3200;
-function updateCamera(){if(overview){camera.fov=62;camera.up.set(0,0,-1);camera.position.set(overviewTarget.x,overviewDistance,overviewTarget.z);camera.lookAt(overviewTarget.x,0,overviewTarget.z);camera.updateProjectionMatrix();return}camera.fov=62;camera.up.set(0,1,0);camera.updateProjectionMatrix();const target=new THREE.Vector3(player.position.x,player.position.y+4.2,player.position.z);if(third){const dist=13;const offset=new THREE.Vector3(Math.sin(yaw)*dist,3.5+pitch*12,Math.cos(yaw)*dist);camera.position.copy(target).add(offset);camera.lookAt(target)}else{camera.position.set(player.position.x,player.position.y+5.35,player.position.z);const forward=new THREE.Vector3(-Math.sin(yaw),pitch*.22,-Math.cos(yaw));camera.lookAt(camera.position.clone().add(forward.multiplyScalar(30)))}}
-updateCamera();
-const introStarted=performance.now(),introDuration=3800;
-const introFrom=new THREE.Vector3(0,1450,1650),introLookFrom=new THREE.Vector3(0,0,0);
-camera.position.copy(introFrom);camera.lookAt(introLookFrom);
-function movePlayer(dt){const speed=32;const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const dir=forward.multiplyScalar(-move.y).add(right.multiplyScalar(move.x));if(dir.lengthSq()>1)dir.normalize();player.position.addScaledVector(dir,speed*dt);const ground=heightAt(player.position.x,player.position.z);vy-=32*dt;player.position.y+=vy*dt;if(player.position.y<=ground){player.position.y=ground;vy=0;onGround=true}if(dir.lengthSq()>.001)player.rotation.y=Math.atan2(dir.x,dir.z);updateCamera();document.getElementById('coords').textContent='X '+Math.round(player.position.x)+' м · Z '+Math.round(player.position.z)+' м'}
-function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.04);last=now;movePlayer(dt);
- const introT=clamp((now-introStarted)/introDuration,0,1);
- if(introT<1&&!overview){const e=introT*introT*(3-2*introT),target=new THREE.Vector3(player.position.x+Math.sin(yaw)*13,player.position.y+7.7+pitch*12,player.position.z+Math.cos(yaw)*13),look=new THREE.Vector3(player.position.x,player.position.y+4.2,player.position.z);camera.position.lerpVectors(introFrom,target,e);camera.lookAt(introLookFrom.clone().lerp(look,e))}
- palmFronds.rotation.z=Math.sin(now*.0007)*.006;palmFronds.rotation.x=Math.cos(now*.00055)*.004;
- clouds.position.x=Math.sin(now*.000018)*95;clouds.position.z=Math.cos(now*.000014)*55;
- sea.position.y=-2.8+Math.sin(now*.00045)*.055;if(seaMat.userData.shader)seaMat.userData.shader.uniforms.uOceanTime.value=now*.001;oceanNormal.offset.set((now*.000012)%1,(now*.000008)%1);waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
-requestAnimationFrame(loop);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);updateCamera()});
-const stick=document.getElementById('stick'),nub=document.getElementById('nub');let stickId=null;
-function setStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=36,l=Math.hypot(dx,dy),k=l>max?max/l:1;move.x=dx*k/max;move.y=dy*k/max;nub.style.transform='translate('+dx*k+'px,'+dy*k+'px)'}
-stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(stickId);setStick(e)});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)setStick(e)});function stopStick(){stickId=null;move.x=move.y=0;nub.style.transform='translate(0,0)'}stick.addEventListener('pointerup',stopStick);stick.addEventListener('pointercancel',stopStick);
-const activePointers=new Map();let lastX=0,lastY=0,lastPinch=0;function pinchGap(){const p=[...activePointers.values()];return p.length<2?0:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)}renderer.domElement.addEventListener('pointerdown',e=>{if(e.clientX<150&&e.clientY>innerHeight-180)return;activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});renderer.domElement.setPointerCapture(e.pointerId);if(activePointers.size===1){lastX=e.clientX;lastY=e.clientY}else if(activePointers.size===2)lastPinch=pinchGap()});renderer.domElement.addEventListener('pointermove',e=>{if(!activePointers.has(e.pointerId))return;const old=activePointers.get(e.pointerId),dx=e.clientX-old.x,dy=e.clientY-old.y;activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(overview){if(activePointers.size>=2){const gap=pinchGap();if(lastPinch>0&&gap>0)overviewDistance=clamp(overviewDistance*lastPinch/gap,450,9000);lastPinch=gap;updateCamera()}else{const scale=overviewDistance/Math.max(innerHeight,1);overviewTarget.x-=dx*scale;overviewTarget.z-=dy*scale;updateCamera()}}else if(activePointers.size===1){yaw-=dx*.004;pitch=clamp(pitch-dy*.0025,-.4,.8)}});function releasePointer(e){activePointers.delete(e.pointerId);lastPinch=activePointers.size===2?pinchGap():0}renderer.domElement.addEventListener('pointerup',releasePointer);renderer.domElement.addEventListener('pointercancel',releasePointer);renderer.domElement.addEventListener('wheel',e=>{if(overview){overviewDistance=clamp(overviewDistance*(e.deltaY>0?1.12:.89),450,9000);updateCamera()}},{passive:true});
-document.getElementById('jump').addEventListener('click',()=>{if(onGround){vy=13;onGround=false}});document.getElementById('view').addEventListener('click',()=>{third=!third;body.visible=third;head.visible=third;pack.visible=third;document.getElementById('view').textContent=third?'3 ЛИЦО':'1 ЛИЦО';if(!overview)updateCamera()});document.getElementById('overview').addEventListener('click',()=>{overview=!overview;const b=document.getElementById('overview');b.classList.toggle('primary',overview);b.title=overview?'Вернуться к персонажу':'Вид сверху: обзор острова';b.setAttribute('aria-label',b.title);if(overview){overviewTarget.set(0,0,0);overviewDistance=3200}updateCamera();document.querySelector('.hint').textContent=overview?'ВИД СВЕРХУ · Перетаскивай одним пальцем, приближай двумя пальцами или кнопками + / −':'Проведи пальцем по экрану, чтобы осмотреть остров'});document.getElementById('zoomIn').addEventListener('click',()=>{if(overview){overviewDistance=clamp(overviewDistance*.72,450,9000);updateCamera()}});document.getElementById('zoomOut').addEventListener('click',()=>{if(overview){overviewDistance=clamp(overviewDistance/.72,450,9000);updateCamera()}});
-addEventListener('keydown',e=>{if(e.key==='w'||e.key==='ArrowUp')move.y=-1;if(e.key==='s'||e.key==='ArrowDown')move.y=1;if(e.key==='a'||e.key==='ArrowLeft')move.x=-1;if(e.key==='d'||e.key==='ArrowRight')move.x=1;if(e.code==='Space'&&onGround){vy=13;onGround=false}});addEventListener('keyup',e=>{if(['w','s','ArrowUp','ArrowDown'].includes(e.key))move.y=0;if(['a','d','ArrowLeft','ArrowRight'].includes(e.key))move.x=0});
-loading.style.opacity='0';setTimeout(()=>{loading.remove();hud.style.display='block'},850);
-}catch(err){document.getElementById('loading').style.display='none';const el=document.getElementById('error');el.style.display='grid';el.innerHTML='<div><h2>SHOHIN ISLAND</h2><p>Не удалось запустить 3D-графику. Обнови страницу или открой её в браузере с поддержкой WebGL.</p><small>'+String(err).replace(/[<>&]/g,'')+'</small></div>'}
+function buy(k){const c=cost[k]();if(s.cash<c)return;s.cash-=c;s[k+'Lv']++;save();render()}
+$('minerBuy').onclick=()=>buy('miner');$('liftBuy').onclick=()=>buy('lift');$('storeBuy').onclick=()=>buy('store');
+$('sell').onclick=()=>{const amount=Math.floor(s.ore);s.ore-=amount;s.cash+=amount*5;save();render()};
+const away=Math.min(4*60*60,Math.max(0,(Date.now()-s.last)/1000));s.ore=Math.min(capacity(),s.ore+away*rate()*.5);
+let prev=Date.now();function tick(){const now=Date.now(),dt=Math.min(1,(now-prev)/1000);prev=now;s.ore=Math.min(capacity(),s.ore+rate()*dt);render()}
+render();setInterval(tick,250);window.addEventListener('beforeunload',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+})();
 </script>
-</body></html>
+</body>
+</html>

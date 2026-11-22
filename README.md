@@ -1,27 +1,14 @@
-# SHOHIN ISLAND
+# SHOHIN MINER
 
-A mobile-first 3D tropical island exploration prototype built with Three.js.
+SHOHIN MINER is a mobile-first 2.5D underground idle mining tycoon.
 
-## World target
-- Planned total world area: **143,100 km²**
-- The current playable prototype is the first local terrain region, approximately **5 km across**. The full world is not generated yet.
-- The large world will need streamed terrain regions, saved world coordinates and biome transitions; it cannot be represented by one giant mesh.
+## Direction
+- Premium dark industrial visual style with emerald and gold accents.
+- Side-view underground mine with multiple levels.
+- Mining, elevator, warehouse, upgrades and offline earnings.
+- Lightweight browser prototype, designed to run smoothly on Android phones.
 
-## Current prototype
-- Procedural mountainous tropical terrain
-- Tropical palms, broadleaf forest, undergrowth, boulders and beaches
-- River and waterfall scene elements
-- Third-person explorer with touch joystick, swipe camera, jump and view toggle
-- Instanced vegetation and capped device pixel ratio for mobile performance
+## Development
+The project starts clean on the `main` branch. The former SHOHIN ISLAND project files have been removed from the current branch.
 
-## Run
-Open `index.html` from GitHub Pages or a local static web server. Three.js is loaded from jsDelivr, so this version requires an internet connection.
-
-## Publish with GitHub Pages
-The workflow in `.github/workflows/pages.yml` deploys the site on pushes to `main`. In repository Settings → Pages, set the source to **GitHub Actions** if it is not already selected.
-
-## Roadmap
-1. Stream terrain in regions across the 143,100 km² world.
-2. Improve terrain materials, realistic water and waterfall effects.
-3. Add varied tropical tree and shrub assets, caves, wildlife and landmarks.
-4. Add offline asset caching and an Android APK wrapper.
+Open `index.html` locally or use the GitHub Pages deployment.

@@ -1,4 +1,4 @@
-name: Publish SHOHIN ISLAND
+name: Publish SHOHIN MINER
 on:
   push:
     branches: [main]
