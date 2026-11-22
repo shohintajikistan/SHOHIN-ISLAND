@@ -114,6 +114,31 @@ const terrain=new THREE.Mesh(terrainGeo,terrainMat);terrain.receiveShadow=true;t
 const grassGeo=new THREE.PlaneGeometry(.24,1.25,1,1);
 grassGeo.translate(0,.625,0);
 const grassMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,side:THREE.DoubleSide});
+// Camera-distance visual LOD: nearby blades stay tall and detailed; distant blades become shorter and less visually dominant.
+grassMat.onBeforeCompile=(shader)=>{
+ shader.vertexShader=shader.vertexShader.replace(
+  '#include <common>',
+  '#include <common>\\nvarying float vGrassLod;'
+ );
+ shader.vertexShader=shader.vertexShader.replace(
+  '#include <begin_vertex>',
+  `#include <begin_vertex>
+   vec4 grassWorldCenter = modelMatrix * instanceMatrix * vec4(0.0,0.0,0.0,1.0);
+   float grassDistance = distance(cameraPosition, grassWorldCenter.xyz);
+   vGrassLod = smoothstep(95.0, 720.0, grassDistance);
+   transformed.y *= mix(1.0, 0.22, vGrassLod);
+   transformed.x *= mix(1.0, 0.62, vGrassLod);`
+ );
+ shader.fragmentShader=shader.fragmentShader.replace(
+  '#include <common>',
+  '#include <common>\\nvarying float vGrassLod;'
+ );
+ shader.fragmentShader=shader.fragmentShader.replace(
+  '#include <color_fragment>',
+  '#include <color_fragment>\\ndiffuseColor.rgb *= mix(1.0, 0.76, vGrassLod);'
+ );
+};
+grassMat.customProgramCacheKey=()=> 'shohin-grass-distance-lod-v1';
 const GRASS_MAX=560000;
 const grass=new THREE.InstancedMesh(grassGeo,grassMat,GRASS_MAX);
 grass.frustumCulled=false;
