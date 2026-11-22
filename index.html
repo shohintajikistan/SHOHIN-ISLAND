@@ -103,7 +103,7 @@ async function syncWorkers(){
 }
 syncWorkers();
 const lamps=[];for(let x of [-4,0,4]){let l=new THREE.PointLight(0xffc66e,20,7,2);l.position.set(x,3.1,0);scene.add(l);let bulb=new THREE.Mesh(new THREE.SphereGeometry(.1,8,8),mat(0xffd889));bulb.position.copy(l.position);scene.add(bulb);lamps.push(l)}
-let resize=()=>{let w=$('world').clientWidth,h=$('world').clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)};new ResizeObserver(resize).observe($('world'));resize();$('loading').style.display='none';
+let resize=()=>{let w=$('world').clientWidth,h=$('world').clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)};new ResizeObserver(resize).observe($('world'));resize();
 let prev=performance.now();function animate(t){requestAnimationFrame(animate);let dt=Math.min(.05,(t-prev)/1000);prev=t;workers.forEach(w=>w.update(dt));cage.position.y=1.2+Math.sin(t*.0007)*.9;rope.scale.y=(4.8-cage.position.y)/2.6;rope.position.y=(4.8+cage.position.y)/2;cart.position.x=-2+Math.sin(t*.0005)*.7;renderer.render(scene,camera)}requestAnimationFrame(animate);
 let last=Date.now();function tick(){let now=Date.now(),dt=Math.min(1,(now-last)/1000);last=now;s.ore=Math.min(capacity(),s.ore+rate()*dt);render()}render();setInterval(tick,250);setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 </script></body></html>
