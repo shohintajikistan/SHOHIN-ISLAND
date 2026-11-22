@@ -1,21 +1,27 @@
 # SHOHIN ISLAND
 
-A mobile-first 3D island exploration prototype built with Three.js.
+A mobile-first 3D tropical island exploration prototype built with Three.js.
+
+## World target
+- Planned total world area: **143,100 km²**
+- The current playable prototype is the first local terrain region, approximately **5 km across**. The full world is not generated yet.
+- The large world will need streamed terrain regions, saved world coordinates and biome transitions; it cannot be represented by one giant mesh.
 
 ## Current prototype
-- Procedural island terrain representing a 5 km × 5 km world
-- Forests, rocky ridges, beaches, river and waterfall elements
+- Procedural mountainous tropical terrain
+- Tropical palms, broadleaf forest, undergrowth, boulders and beaches
+- River and waterfall scene elements
 - Third-person explorer with touch joystick, swipe camera, jump and view toggle
-- Performance-conscious instanced vegetation and capped device pixel ratio
+- Instanced vegetation and capped device pixel ratio for mobile performance
 
 ## Run
-Open `index.html` from GitHub Pages or a local static web server. Three.js is loaded from jsDelivr, so the first version requires an internet connection.
+Open `index.html` from GitHub Pages or a local static web server. Three.js is loaded from jsDelivr, so this version requires an internet connection.
 
 ## Publish with GitHub Pages
-The workflow in `.github/workflows/pages.yml` deploys the site on every push to `main`. In repository Settings → Pages, set the source to **GitHub Actions** if it is not already selected.
+The workflow in `.github/workflows/pages.yml` deploys the site on pushes to `main`. In repository Settings → Pages, set the source to **GitHub Actions** if it is not already selected.
 
 ## Roadmap
-1. Improve terrain materials and shoreline detail.
-2. Replace procedural placeholders with optimized original 3D assets.
-3. Add sound, wildlife, landmarks, caves and better water.
+1. Stream terrain in regions across the 143,100 km² world.
+2. Improve terrain materials, realistic water and waterfall effects.
+3. Add varied tropical tree and shrub assets, caves, wildlife and landmarks.
 4. Add offline asset caching and an Android APK wrapper.
