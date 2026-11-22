@@ -43,7 +43,40 @@ const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,12000);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.setClearColor(0x9bc9d4,1);renderer.domElement.style.imageRendering='auto';root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xc8e8ff,0x38513a,1.7));
-const sun=new THREE.DirectionalLight(0xffedcf,3.1);sun.position.set(-260,380,-180);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-320;sun.shadow.camera.right=320;sun.shadow.camera.top=320;sun.shadow.camera.bottom=-320;sun.shadow.bias=-.00025;scene.add(sun);
+// Visible tropical sun with a soft atmospheric halo; the directional light follows the same direction.
+const sunDirection=new THREE.Vector3(-.48,.34,-.81).normalize();
+const sunLight=new THREE.DirectionalLight(0xffe5b5,3.15);
+sunLight.position.copy(sunDirection).multiplyScalar(900);
+sunLight.castShadow=true;sunLight.shadow.mapSize.set(2048,2048);
+sunLight.shadow.camera.left=-320;sunLight.shadow.camera.right=320;
+sunLight.shadow.camera.top=320;sunLight.shadow.camera.bottom=-320;
+sunLight.shadow.bias=-.00025;scene.add(sunLight);
+const sunDisk=new THREE.Mesh(new THREE.SphereGeometry(92,32,24),new THREE.MeshBasicMaterial({color:0xffedbd}));
+sunDisk.position.copy(sunDirection).multiplyScalar(4800);scene.add(sunDisk);
+const glowCanvas=document.createElement('canvas');glowCanvas.width=glowCanvas.height=256;
+const glowCtx=glowCanvas.getContext('2d'),glowGrad=glowCtx.createRadialGradient(128,128,8,128,128,126);
+glowGrad.addColorStop(0,'rgba(255,238,190,0.72)');glowGrad.addColorStop(.22,'rgba(255,219,150,0.28)');glowGrad.addColorStop(1,'rgba(255,205,130,0)');
+glowCtx.fillStyle=glowGrad;glowCtx.fillRect(0,0,256,256);
+const sunGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(glowCanvas),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+sunGlow.position.copy(sunDisk.position);sunGlow.scale.set(780,780,1);scene.add(sunGlow);
+// One instanced cloud layer: soft clusters of low-poly cumulus puffs, drifting slowly over the island.
+const cloudGeo=new THREE.SphereGeometry(1,10,7);
+const cloudMat=new THREE.MeshStandardMaterial({color:0xf2f5f1,roughness:1,metalness:0});
+const clouds=new THREE.InstancedMesh(cloudGeo,cloudMat,180);
+const cloudDummy=new THREE.Object3D();let cloudIndex=0;
+for(let c=0;c<24;c++){
+ const cx=(Math.random()-.5)*5200,cz=(Math.random()-.5)*5200,baseY=300+Math.random()*210;
+ const puffs=6+Math.floor(Math.random()*3);
+ for(let p=0;p<puffs;p++){
+  const a=p/puffs*Math.PI*2,rad=35+Math.random()*75;
+  cloudDummy.position.set(cx+Math.cos(a)*rad,baseY+(Math.random()-.5)*34,cz+Math.sin(a)*rad);
+  const size=38+Math.random()*58;
+  cloudDummy.scale.set(size*(1.1+Math.random()*.7),size*(.42+Math.random()*.35),size);
+  cloudDummy.rotation.set(0,Math.random()*Math.PI,0);cloudDummy.updateMatrix();
+  clouds.setMatrixAt(cloudIndex++,cloudDummy.matrix);
+ }
+}
+clouds.count=cloudIndex;clouds.instanceMatrix.needsUpdate=true;clouds.frustumCulled=false;scene.add(clouds);
 // High-quality tropical ocean: shallow turquoise shelf, deep offshore blue, moving multi-scale waves and scrolling micro-ripples.
 function makeWaterNormal(){
  const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d'),im=ctx.createImageData(256,256);
@@ -358,6 +391,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  const introT=clamp((now-introStarted)/introDuration,0,1);
  if(introT<1&&!overview){const e=introT*introT*(3-2*introT),target=new THREE.Vector3(player.position.x+Math.sin(yaw)*13,player.position.y+7.7+pitch*12,player.position.z+Math.cos(yaw)*13),look=new THREE.Vector3(player.position.x,player.position.y+4.2,player.position.z);camera.position.lerpVectors(introFrom,target,e);camera.lookAt(introLookFrom.clone().lerp(look,e))}
  palmFronds.rotation.z=Math.sin(now*.0007)*.006;palmFronds.rotation.x=Math.cos(now*.00055)*.004;
+ clouds.position.x=Math.sin(now*.000018)*95;clouds.position.z=Math.cos(now*.000014)*55;
  sea.position.y=-2.8+Math.sin(now*.00045)*.055;if(seaMat.userData.shader)seaMat.userData.shader.uniforms.uOceanTime.value=now*.001;oceanNormal.offset.set((now*.000012)%1,(now*.000008)%1);waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
 requestAnimationFrame(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);updateCamera()});
