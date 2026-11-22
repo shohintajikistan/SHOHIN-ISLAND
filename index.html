@@ -15,7 +15,7 @@
 #controls{position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom,0px));height:140px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px;pointer-events:none}
 #stick{width:116px;height:116px;border-radius:50%;background:#071c1680;border:1px solid #d4f5df55;position:relative;pointer-events:auto;touch-action:none}
 #nub{position:absolute;width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#baf05b,#08a56c);border:2px solid #eaffd4;left:33px;top:33px;box-shadow:0 4px 18px #0007}
-.actions{display:flex;gap:12px;align-items:flex-end;pointer-events:auto}.act{width:58px;height:58px;border-radius:50%;border:1px solid #d5f5dd66;background:#071c16bb;color:#effff5;font-size:11px;font-weight:800;backdrop-filter:blur(8px)}.act.primary{background:linear-gradient(145deg,#0c9866,#07563d);border-color:#baf05b88}
+.actions{display:flex;gap:12px;align-items:flex-end;pointer-events:auto}.act{width:58px;height:58px;border-radius:50%;border:1px solid #d5f5dd66;background:#071c16bb;color:#effff5;font-size:11px;font-weight:800;backdrop-filter:blur(8px)}.act.primary{background:linear-gradient(145deg,#0c9866,#07563d);border-color:#baf05b88}.act.zoom{width:42px;height:42px;font-size:20px}
 #cross{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#ffffffaa;transform:translate(-50%,-50%);opacity:.5}
 #notice{position:fixed;left:50%;bottom:165px;transform:translateX(-50%);background:#071c16dd;border:1px solid #baf05b55;padding:9px 14px;border-radius:12px;font-size:11px;display:none;white-space:nowrap}
 #error{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:28px;background:#071c16;z-index:20;color:#effff5}
@@ -30,7 +30,7 @@
 <div id="hud">
  <div class="top"><div class="panel"><div class="logo">SHOHIN TAJIKISTAN</div><div class="location">SHOHIN ISLAND · OPEN WORLD</div></div><div class="panel status"><div>WORLD <b>143,100 KM²</b></div><div id="coords">X 0 · Z 0</div></div></div>
  <div class="hint">Проведи пальцем по экрану, чтобы осмотреть остров</div><div id="cross"></div>
- <div id="controls"><div id="stick"><div id="nub"></div></div><div class="actions"><button class="act" id="view">ВИД</button><button class="act" id="overview" aria-label="Показать весь остров" title="Обзор всего острова"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="act" id="zoomIn" aria-label="Приблизить карту">+</button><button class="act" id="zoomOut" aria-label="Отдалить карту">−</button><button class="act primary" id="jump">ПРЫЖОК</button></div></div>
+ <div id="controls"><div id="stick"><div id="nub"></div></div><div class="actions"><button class="act" id="view">ВИД</button><button class="act" id="overview" aria-label="Показать весь остров" title="Обзор всего острова"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="act zoom" id="zoomIn" aria-label="Приблизить карту">+</button><button class="act zoom" id="zoomOut" aria-label="Отдалить карту">−</button><button class="act primary" id="jump">ПРЫЖОК</button></div></div>
 </div>
 <div id="notice"></div><div id="error"></div>
 <script type="module">
