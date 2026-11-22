@@ -83,23 +83,33 @@ function makeGroundMaps(){
 const groundBump=makeGroundMaps();
 const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.98,bumpMap:groundBump,bumpScale:1.35});
 const terrain=new THREE.Mesh(terrainGeo,terrainMat);terrain.receiveShadow=true;terrain.castShadow=true;scene.add(terrain);
-// Dense natural grass on lowland areas; instanced blades keep the mobile frame rate stable.
-const grassGeo=new THREE.ConeGeometry(.13,1.15,3);
-grassGeo.translate(0,.52,0);
-const grassMat=new THREE.MeshStandardMaterial({color:0x4d963c,roughness:1,side:THREE.DoubleSide});
-const grass=new THREE.InstancedMesh(grassGeo,grassMat,26000);
+// Dense island-wide tropical grass. One instanced draw keeps the vegetation affordable on phones.
+const grassGeo=new THREE.ConeGeometry(.16,1.45,3);
+grassGeo.translate(0,.66,0);
+const grassMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,side:THREE.DoubleSide});
+const GRASS_MAX=56000;
+const grass=new THREE.InstancedMesh(grassGeo,grassMat,GRASS_MAX);
 grass.frustumCulled=false;
-const grassDummy=new THREE.Object3D();let grassCount=0,grassTries=0;
-while(grassCount<26000&&grassTries<90000){
+const grassDummy=new THREE.Object3D(),grassColor=new THREE.Color();
+let grassCount=0,grassTries=0;
+while(grassCount<GRASS_MAX&&grassTries<210000){
  grassTries++;
  const gx=(Math.random()-.5)*4400,gz=(Math.random()-.5)*4400,gy=heightAt(gx,gz);
- if(gy<4||gy>32||Math.hypot(gx,gz)>2220)continue;
- const h=.45+Math.random()*1.15,w=.65+Math.random()*.75;
- grassDummy.position.set(gx,gy+.04,gz);
- grassDummy.rotation.set((Math.random()-.5)*.22,Math.random()*Math.PI*2,(Math.random()-.5)*.22);
- grassDummy.scale.set(w,h,w);grassDummy.updateMatrix();grass.setMatrixAt(grassCount++,grassDummy.matrix);
+ // Keep pale beaches and bare high rocky peaks clear; cover the island's green slopes and valleys.
+ if(gy<3.2||gy>78||Math.hypot(gx,gz)>2220)continue;
+ const h=.55+Math.random()*1.35,w=.65+Math.random()*.85;
+ grassDummy.position.set(gx,gy+.045,gz);
+ grassDummy.rotation.set((Math.random()-.5)*.28,Math.random()*Math.PI*2,(Math.random()-.5)*.28);
+ grassDummy.scale.set(w,h,w);grassDummy.updateMatrix();
+ grass.setMatrixAt(grassCount,grassDummy.matrix);
+ const shade=Math.random();
+ grassColor.set(shade<.25?0x326f35:shade<.7?0x4c963c:0x75a94b);
+ grass.setColorAt(grassCount,grassColor);
+ grassCount++;
 }
-grass.count=grassCount;grass.instanceMatrix.needsUpdate=true;grass.receiveShadow=true;scene.add(grass);
+grass.count=grassCount;grass.instanceMatrix.needsUpdate=true;
+if(grass.instanceColor)grass.instanceColor.needsUpdate=true;
+grass.receiveShadow=true;scene.add(grass);
 // Shoreline sand coves
 const sandMat=new THREE.MeshStandardMaterial({color:0xd8c18a,roughness:1,bumpMap:groundBump,bumpScale:.55});
 for(let i=0;i<8;i++){const a=i*Math.PI/4+.2,x=Math.cos(a)*1900,z=Math.sin(a)*1900;const patch=new THREE.Mesh(new THREE.CircleGeometry(190,32),sandMat);patch.rotation.x=-Math.PI/2;patch.rotation.z=-a;patch.position.set(x,heightAt(x,z)+.22,z);patch.scale.set(1.5,.75,1);scene.add(patch)}
