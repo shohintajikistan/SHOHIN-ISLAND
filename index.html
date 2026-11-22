@@ -252,9 +252,9 @@ for(let i=0;i<8;i++){const a=i*Math.PI/4+.2,x=Math.cos(a)*1900,z=Math.sin(a)*190
 // Instanced forests: tree counts tuned for mobile
 const trunkGeo=new THREE.CylinderGeometry(.35,.55,5,6),leafGeo=new THREE.ConeGeometry(3.2,11,7);
 const trunkMat=new THREE.MeshStandardMaterial({color:0x63452d,roughness:1}),leafMat=new THREE.MeshStandardMaterial({color:0x245a39,roughness:.95});
-const trunks=new THREE.InstancedMesh(trunkGeo,trunkMat,2600),leaves=new THREE.InstancedMesh(leafGeo,leafMat,2600);trunks.castShadow=true;leaves.castShadow=true;
+const trunks=new THREE.InstancedMesh(trunkGeo,trunkMat,7800),leaves=new THREE.InstancedMesh(leafGeo,leafMat,7800);trunks.castShadow=true;leaves.castShadow=true;
 const dummy=new THREE.Object3D();let count=0,tries=0;
-while(count<2600&&tries<26000){tries++;const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<4||y>145||Math.sqrt(x*x+z*z)>2220)continue;
+while(count<7800&&tries<78000){tries++;const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);if(y<4||y>145||Math.sqrt(x*x+z*z)>2220)continue;
 const s=.7+Math.random()*.9;dummy.position.set(x,y+2.4*s,z);dummy.rotation.y=Math.random()*6.28;dummy.scale.set(s,s,s);dummy.updateMatrix();trunks.setMatrixAt(count,dummy.matrix);
 dummy.position.y=y+7*s;dummy.scale.set(s,s,s);dummy.updateMatrix();leaves.setMatrixAt(count,dummy.matrix);count++}
 trunks.count=count;leaves.count=count;scene.add(trunks,leaves);
@@ -271,7 +271,7 @@ const palmTrunkGeo=new THREE.CylinderGeometry(.2,.48,10,8,5);
 const palmTrunkMat=new THREE.MeshStandardMaterial({color:0x80603b,roughness:1});
 const palmFrondGeo=makePalmFrond();
 const palmLeafMat=new THREE.MeshStandardMaterial({color:0x287c43,roughness:.88,side:THREE.DoubleSide});
-const PALM_COUNT=360,FRONDS=8;
+const PALM_COUNT=1080,FRONDS=8;
 const palmTrunks=new THREE.InstancedMesh(palmTrunkGeo,palmTrunkMat,PALM_COUNT);
 const palmFronds=new THREE.InstancedMesh(palmFrondGeo,palmLeafMat,PALM_COUNT*FRONDS);
 palmTrunks.castShadow=true;palmFronds.castShadow=true;
