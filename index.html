@@ -40,14 +40,14 @@ const root=document.getElementById('game'),loading=document.getElementById('load
 try{
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x8fcbdc);scene.fog=new THREE.FogExp2(0x9fcbd0,.000105);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,12000);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.setClearColor(0x9bc9d4,1);renderer.domElement.style.imageRendering='auto';root.appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance',stencil:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.BasicShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.setClearColor(0x9bc9d4,1);renderer.domElement.style.imageRendering='auto';root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xc8e8ff,0x38513a,1.7));
 // Visible tropical sun with a soft atmospheric halo; the directional light follows the same direction.
 const sunDirection=new THREE.Vector3(-.48,.34,-.81).normalize();
 const sunLight=new THREE.DirectionalLight(0xffe5b5,3.15);
 sunLight.position.copy(sunDirection).multiplyScalar(900);
-sunLight.castShadow=true;sunLight.shadow.mapSize.set(2048,2048);
+sunLight.castShadow=true;sunLight.shadow.mapSize.set(1024,1024);
 sunLight.shadow.camera.left=-320;sunLight.shadow.camera.right=320;
 sunLight.shadow.camera.top=320;sunLight.shadow.camera.bottom=-320;
 sunLight.shadow.bias=-.00025;scene.add(sunLight);
@@ -222,37 +222,13 @@ makeCascade(510,260,365,155,27,-.4);
 const grassGeo=new THREE.PlaneGeometry(.24,1.25,1,1);
 grassGeo.translate(0,.625,0);
 const grassMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,side:THREE.DoubleSide});
-// Camera-distance visual LOD: nearby blades stay tall and detailed; distant blades become shorter and less visually dominant.
-grassMat.onBeforeCompile=(shader)=>{
- shader.vertexShader=shader.vertexShader.replace(
-  '#include <common>',
-  '#include <common>\\nvarying float vGrassLod;'
- );
- shader.vertexShader=shader.vertexShader.replace(
-  '#include <begin_vertex>',
-  `#include <begin_vertex>
-   vec4 grassWorldCenter = modelMatrix * instanceMatrix * vec4(0.0,0.0,0.0,1.0);
-   float grassDistance = distance(cameraPosition, grassWorldCenter.xyz);
-   vGrassLod = smoothstep(95.0, 720.0, grassDistance);
-   transformed.y *= mix(1.0, 0.22, vGrassLod);
-   transformed.x *= mix(1.0, 0.62, vGrassLod);`
- );
- shader.fragmentShader=shader.fragmentShader.replace(
-  '#include <common>',
-  '#include <common>\\nvarying float vGrassLod;'
- );
- shader.fragmentShader=shader.fragmentShader.replace(
-  '#include <color_fragment>',
-  '#include <color_fragment>\\ndiffuseColor.rgb *= mix(1.0, 0.76, vGrassLod);'
- );
-};
-grassMat.customProgramCacheKey=()=> 'shohin-grass-distance-lod-v1';
-const GRASS_MAX=560000;
+// Mobile-friendly grass: keep the green slopes filled without overwhelming phone memory.
+const GRASS_MAX=90000;
 const grass=new THREE.InstancedMesh(grassGeo,grassMat,GRASS_MAX);
 grass.frustumCulled=false;
 const grassDummy=new THREE.Object3D(),grassColor=new THREE.Color();
 let grassCount=0,grassTries=0;
-while(grassCount<GRASS_MAX&&grassTries<2600000){
+while(grassCount<GRASS_MAX&&grassTries<650000){
  grassTries++;
  const gx=(Math.random()-.5)*4400,gz=(Math.random()-.5)*4400,gy=heightAt(gx,gz);
  // Cover green slopes and valleys; preserve pale beaches and exposed high rocky peaks.
@@ -445,7 +421,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000
  clouds.position.x=Math.sin(now*.000018)*95;clouds.position.z=Math.cos(now*.000014)*55;
  sea.position.y=-2.8+Math.sin(now*.00045)*.055;if(seaMat.userData.shader)seaMat.userData.shader.uniforms.uOceanTime.value=now*.001;oceanNormal.offset.set((now*.000012)%1,(now*.000008)%1);waterfall.material.opacity=.62+Math.sin(now*.006)*.1;renderer.render(scene,camera)}
 requestAnimationFrame(loop);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);updateCamera()});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);updateCamera()});
 const stick=document.getElementById('stick'),nub=document.getElementById('nub');let stickId=null;
 function setStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=36,l=Math.hypot(dx,dy),k=l>max?max/l:1;move.x=dx*k/max;move.y=dy*k/max;nub.style.transform='translate('+dx*k+'px,'+dy*k+'px)'}
 stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(stickId);setStick(e)});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)setStick(e)});function stopStick(){stickId=null;move.x=move.y=0;nub.style.transform='translate(0,0)'}stick.addEventListener('pointerup',stopStick);stick.addEventListener('pointercancel',stopStick);
