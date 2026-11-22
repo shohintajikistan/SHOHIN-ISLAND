@@ -30,7 +30,6 @@
 </script>
 <script type="module">
 import * as THREE from 'three';
-import { Library, catalogFromFiles, Character } from 'https://cdn.jsdelivr.net/gh/NoLimitNexus/game-models@main/character.js';
 const $=id=>document.getElementById(id);
 const defaults={cash:250,ore:0,minerLv:1,liftLv:1,storeLv:1,last:Date.now()};
 let s;try{s={...defaults,...JSON.parse(localStorage.getItem('shohinMinerSave')||'{}')}}catch{s={...defaults}}
@@ -63,47 +62,73 @@ block(1.8,4.8,1.8,wood,4,2.35,-2.7);for(let x of [3.25,4.75])for(let z of [-3.45
 const cage=new THREE.Group();block(1.25,.15,1.2,gold,0,0,0).parent.remove;let base=new THREE.Mesh(new THREE.BoxGeometry(1.2,.16,1.1),gold);base.position.y=0;cage.add(base);for(let x of [-.55,.55])for(let z of [-.48,.48]){let p=new THREE.Mesh(new THREE.BoxGeometry(.08,1.25,.08),wood);p.position.set(x,.62,z);cage.add(p)}scene.add(cage);cage.position.set(4,1.2,-2.7);
 const rope=block(.045,2.6,.045,dark,4,4.8,-2.7);
 let workers=[];
-const MODEL_BASE='https://cdn.jsdelivr.net/gh/NoLimitNexus/game-models@main/';
-async function makeMiner(x,z,index,lib){
-  const character=await Character.create(lib,{
-    parts:{hair:'hair_tousled',top:'top_long',bottom:'bottom_trousers',boots:'boots_tall',hat:'hat_beanie',back:'back_pack'},
-    colors:{skin:'#e8b98f',hair:'#38271d',shirt:index%2?'#087b53':'#08a56c',trousers:'#343d39',boots:'#26221d',hat:'#d9a23a',pack:'#76522e'},
-    tool:'pickaxe'
-  });
-  character.setHeight(1.55);
-  character.holder.position.set(x,0,z);
-  character.holder.rotation.y=-Math.PI/2;
-  scene.add(character.holder);
-  await character.playRole('mine');
-  return character;
+const skinMat=mat(0xd6a078), shirtMat=mat(0x087b53), shirtAlt=mat(0x08a56c), trouserMat=mat(0x293a34), bootMat=mat(0x211e19), helmetMat=mat(0xe0b34c), metalMat=mat(0x9aa5a2), pickWood=mat(0x80542e);
+function makeMiner(x,z,index){
+  const root=new THREE.Group(); root.position.set(x,0,z); scene.add(root);
+  const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.25,.48,4,8),index%2?shirtMat:shirtAlt); torso.position.y=1.02; torso.castShadow=true; root.add(torso);
+  const belt=new THREE.Mesh(new THREE.CylinderGeometry(.255,.255,.09,10),gold);belt.position.y=.78;root.add(belt);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.205,12,10),skinMat);head.position.set(0,1.52,0);head.castShadow=true;root.add(head);
+  const helmet=new THREE.Mesh(new THREE.SphereGeometry(.235,12,8,0,Math.PI*2,0,Math.PI/2),helmetMat);helmet.position.set(0,1.66,0);helmet.castShadow=true;root.add(helmet);
+  const brim=new THREE.Mesh(new THREE.CylinderGeometry(.27,.27,.045,12),helmetMat);brim.position.set(0,1.63,0);root.add(brim);
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.055,8,8),mat(0xffefad));lamp.position.set(0,1.69,.21);root.add(lamp);
+  const backpack=new THREE.Mesh(new THREE.BoxGeometry(.32,.42,.17),mat(0x76502e));backpack.position.set(0,1.05,-.22);root.add(backpack);
+  function limb(parent,upperLen,lowerLen,material){
+    const pivot=new THREE.Group();parent.add(pivot);
+    const upper=new THREE.Mesh(new THREE.CylinderGeometry(.105,.13,upperLen,8),material);upper.position.y=-upperLen/2;upper.castShadow=true;pivot.add(upper);
+    const elbow=new THREE.Group();elbow.position.y=-upperLen;pivot.add(elbow);
+    const lower=new THREE.Mesh(new THREE.CylinderGeometry(.075,.095,lowerLen,8),material);lower.position.y=-lowerLen/2;lower.castShadow=true;elbow.add(lower);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(.085,8,8),skinMat);hand.position.y=-lowerLen;elbow.add(hand);
+    return {pivot,elbow};
+  }
+  const leftArm=limb(root,.34,.32,shirtMat);leftArm.pivot.position.set(-.29,1.31,0);
+  const rightArm=limb(root,.34,.32,shirtMat);rightArm.pivot.position.set(.29,1.31,0);
+  const leftLeg=limb(root,.34,.32,trouserMat);leftLeg.pivot.position.set(-.13,.65,0);
+  const rightLeg=limb(root,.34,.32,trouserMat);rightLeg.pivot.position.set(.13,.65,0);
+  for(const leg of [leftLeg,rightLeg]){
+    const boot=new THREE.Mesh(new THREE.BoxGeometry(.19,.13,.3),bootMat);boot.position.set(0,-.67,.075);leg.elbow.add(boot);
+  }
+  // The pickaxe is attached to the right hand and swings with the miner's arm.
+  const tool=new THREE.Group();tool.position.set(.02,-.63,.02);rightArm.elbow.add(tool);
+  const handle=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.72,7),pickWood);handle.position.y=-.16;tool.add(handle);
+  const headBar=new THREE.Mesh(new THREE.BoxGeometry(.48,.075,.11),metalMat);headBar.position.set(0,.19,0);tool.add(headBar);
+  const tip1=new THREE.Mesh(new THREE.ConeGeometry(.075,.23,6),metalMat);tip1.position.set(-.22,.19,0);tip1.rotation.z=Math.PI/2;tool.add(tip1);
+  const tip2=new THREE.Mesh(new THREE.ConeGeometry(.075,.23,6),metalMat);tip2.position.set(.22,.19,0);tip2.rotation.z=-Math.PI/2;tool.add(tip2);
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.34,16),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;root.add(shadow);
+  return {
+    root, update(dt,t){
+      const phase=t*.003+index*1.7;
+      const swing=Math.sin(phase);
+      rightArm.pivot.rotation.x=-.35+Math.max(0,swing)*1.05;
+      rightArm.pivot.rotation.z=-.15+Math.sin(phase*.5)*.12;
+      rightArm.elbow.rotation.x=-.25+Math.max(0,swing)*.5;
+      leftArm.pivot.rotation.x=.22-Math.max(0,swing)*.34;
+      leftArm.elbow.rotation.x=-.18;
+      torso.rotation.x=.04+Math.max(0,swing)*.08;
+      root.position.y=Math.abs(Math.sin(phase*2))*.018;
+      leftLeg.pivot.rotation.x=Math.sin(phase*2)*.07;
+      rightLeg.pivot.rotation.x=-Math.sin(phase*2)*.07;
+    }
+  };
 }
-let minerLibrary=null, minersLoading=false;
-async function syncWorkers(){
-  if(minersLoading)return;
-  minersLoading=true;
-  try{
-    if(workers.length===0){$('loading').style.display='grid';$('loading').textContent='Загрузка профессиональных 3D-моделей…';}
-    if(!minerLibrary){
-      const catalog=await catalogFromFiles(MODEL_BASE);
-      catalog.animations=catalog.animations.filter(f=>f.group==='Tools');
-      minerLibrary=new Library(catalog);
-    }
-    const wanted=Math.min(12,2+s.minerLv);
-    while(workers.length<wanted){
-      const i=workers.length;
-      const worker=await makeMiner(-3+(i%4)*1.1,.9+Math.floor(i/4)*.8,i,minerLibrary);
-      workers.push(worker);
-    }
-    $('loading').style.display='none';
-  }catch(err){
-    console.error('3D character assets could not load:',err);
-    $('loading').style.display='grid';
-    $('loading').textContent='Не удалось загрузить 3D-модели. Проверьте интернет и обновите страницу.';
-  }finally{minersLoading=false;if(workers.length<Math.min(12,2+s.minerLv))syncWorkers();}
+function syncWorkers(){
+  const wanted=Math.min(9,2+s.minerLv);
+  while(workers.length<wanted){
+    const i=workers.length;
+    const positions=[[-3.9,1.05],[-2.65,1.15],[-1.4,1.05],[-4.0,2.05],[-2.7,2.1],[-1.4,2.05],[-4.0,-.05],[-2.7,-.05],[-1.4,-.05]];
+    const p=positions[i];
+    workers.push(makeMiner(p[0],p[1],i));
+  }
+}
+syncWorkers();
+const orePile= new THREE.Mesh(new THREE.DodecahedronGeometry(.48,1),coal);orePile.position.set(-4.45,.22,-.25);orePile.scale.set(.8,.55,.8);orePile.castShadow=true;scene.add(orePile);
+const impactLight=new THREE.PointLight(0xffbd55,0,2.4);impactLight.position.set(-4.2,1.1,-.1);scene.add(impactLight);
+const sparks=[];
+for(let i=0;i<7;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.035,6,6),mat(0xffd36b));p.visible=false;scene.add(p);sparks.push(p);}
+}
 }
 syncWorkers();
 const lamps=[];for(let x of [-4,0,4]){let l=new THREE.PointLight(0xffc66e,20,7,2);l.position.set(x,3.1,0);scene.add(l);let bulb=new THREE.Mesh(new THREE.SphereGeometry(.1,8,8),mat(0xffd889));bulb.position.copy(l.position);scene.add(bulb);lamps.push(l)}
 let resize=()=>{let w=$('world').clientWidth,h=$('world').clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)};new ResizeObserver(resize).observe($('world'));resize();
-let prev=performance.now();function animate(t){requestAnimationFrame(animate);let dt=Math.min(.05,(t-prev)/1000);prev=t;workers.forEach(w=>w.update(dt));cage.position.y=1.2+Math.sin(t*.0007)*.9;rope.scale.y=(4.8-cage.position.y)/2.6;rope.position.y=(4.8+cage.position.y)/2;cart.position.x=-2+Math.sin(t*.0005)*.7;renderer.render(scene,camera)}requestAnimationFrame(animate);
+let prev=performance.now();function animate(t){requestAnimationFrame(animate);let dt=Math.min(.05,(t-prev)/1000);prev=t;workers.forEach(w=>w.update(dt,t));const miningPulse=(Math.sin(t*.009)+1)/2;impactLight.intensity=miningPulse>0.92?5:0; sparks.forEach((p,i)=>{const active=miningPulse>0.92;p.visible=active;p.position.set(-4.2+Math.sin(t*.02+i*2)*.22,1.0+Math.abs(Math.sin(t*.03+i))*0.45,-.1+Math.cos(t*.02+i*2)*.2)});orePile.scale.set(.8+Math.min(.45,s.ore/capacity())*.35,.55+Math.min(.45,s.ore/capacity())*.45,.8+Math.min(.45,s.ore/capacity())*.35);cage.position.y=1.2+Math.sin(t*.0007)*.9;rope.scale.y=(4.8-cage.position.y)/2.6;rope.position.y=(4.8+cage.position.y)/2;cart.position.x=-2+Math.sin(t*.0005)*.7;renderer.render(scene,camera)}requestAnimationFrame(animate);
 let last=Date.now();function tick(){let now=Date.now(),dt=Math.min(1,(now-last)/1000);last=now;s.ore=Math.min(capacity(),s.ore+rate()*dt);render()}render();setInterval(tick,250);setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 </script></body></html>
