@@ -167,6 +167,57 @@ function makeWetClayRoughness(){
 const wetClayRoughness=makeWetClayRoughness();
 const terrainMat=new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.46,roughnessMap:wetClayRoughness,clearcoat:.62,clearcoatRoughness:.24,bumpMap:groundBump,bumpScale:1.2});
 const terrain=new THREE.Mesh(terrainGeo,terrainMat);terrain.receiveShadow=true;terrain.castShadow=true;scene.add(terrain);
+
+// CHINESE KARST MOUNTAIN RANGE: tall limestone towers with fluted cliff faces.
+const karstMat=new THREE.MeshStandardMaterial({color:0x777d72,roughness:.94,vertexColors:true});
+const karstGreen=new THREE.MeshStandardMaterial({color:0x315b3b,roughness:1});
+function makeKarstPeak(cx,cz,height,baseRadius,seed){
+ const rings=12,segments=24,verts=[],cols=[],inds=[];
+ const topY=heightAt(cx,cz);
+ for(let j=0;j<=rings;j++){
+  const t=j/rings;
+  for(let i=0;i<=segments;i++){
+   const a=i/segments*Math.PI*2;
+   const ridge=.78+.22*Math.sin(a*5+seed)*Math.sin(a*2+seed*.7);
+   const noiseR=1+.10*Math.sin(a*9+seed*2)+.045*Math.cos(a*13-seed);
+   const taper=Math.pow(1-t,.58);
+   const radius=baseRadius*taper*ridge*noiseR*(.92+.08*Math.sin(t*17+seed));
+   const y=topY+height*t+(j===rings?Math.sin(a*3+seed)*height*.025:0);
+   verts.push(cx+Math.cos(a)*radius,y,cz+Math.sin(a)*radius);
+   const rock=new THREE.Color(0x777d72).lerp(new THREE.Color(0x405b43),clamp((noise(cx*.01+Math.cos(a)*radius*.01,cz*.01+Math.sin(a)*radius*.01)-.25)*.55,0,.45));
+   const shade=.88+.12*Math.sin(a*7+seed);rock.multiplyScalar(shade);cols.push(rock.r,rock.g,rock.b);
+   if(j<rings&&i<segments){const q=j*(segments+1)+i;inds.push(q,q+segments+1,q+1,q+1,q+segments+1,q+segments+2)}
+  }
+ }
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));g.setIndex(inds);g.computeVertexNormals();
+ const peak=new THREE.Mesh(g,karstMat);peak.castShadow=true;peak.receiveShadow=true;scene.add(peak);
+ // Broken green ledges cling to selected lower cliff shelves.
+ for(let k=0;k<3;k++){const y=topY+height*(.18+k*.16),r=baseRadius*(1-k*.16);const shelf=new THREE.Mesh(new THREE.DodecahedronGeometry(r*.66,1),karstGreen);shelf.scale.set(1,.10,1);shelf.position.set(cx,y,cz);shelf.rotation.y=seed+k;scene.add(shelf)}
+}
+[
+ [-720,120,390,112,1],[-490,410,470,128,2],[-170,560,430,118,3],
+ [180,420,520,138,4],[510,260,410,112,5],[760,610,360,105,6],
+ [-850,760,330,96,7],[360,850,390,108,8]
+].forEach(p=>makeKarstPeak(...p));
+// Narrow vertical cascades on the cliff faces, with turquoise plunge pools below.
+const cascadeMat=new THREE.MeshPhysicalMaterial({color:0xc9f7f4,transparent:true,opacity:.82,roughness:.1,metalness:.04,clearcoat:1,side:THREE.DoubleSide,emissive:0x174c50,depthWrite:false});
+function makeCascade(x,z,top,bottom,width,turn){
+ const group=new THREE.Group();
+ const geo=new THREE.PlaneGeometry(width,top-bottom,4,28);
+ const pos=geo.attributes.position;
+ for(let i=0;i<pos.count;i++){const wave=Math.sin((pos.getY(i)+top)*.075+turn)*.9;pos.setX(i,pos.getX(i)+wave)}
+ geo.computeVertexNormals();
+ const sheet=new THREE.Mesh(geo,cascadeMat);sheet.position.y=(top+bottom)/2;group.add(sheet);
+ group.position.set(x,bottom,z);group.rotation.y=turn;scene.add(group);
+ const pool=new THREE.Mesh(new THREE.CircleGeometry(width*1.45,28),new THREE.MeshPhysicalMaterial({color:0x43c6c9,transparent:true,opacity:.72,roughness:.16,clearcoat:1}));
+ pool.rotation.x=-Math.PI/2;pool.position.set(x,bottom+.8,z+16);scene.add(pool);
+ return sheet;
+}
+makeCascade(-490,410,420,205,34,.35);
+makeCascade(-170,560,390,180,29,-.25);
+makeCascade(180,420,485,210,38,.18);
+makeCascade(510,260,365,155,27,-.4);
+
 // Ultra-dense island grass: 560,000 lightweight instanced blades, without per-blade shadows.
 const grassGeo=new THREE.PlaneGeometry(.24,1.25,1,1);
 grassGeo.translate(0,.625,0);
