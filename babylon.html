@@ -18,7 +18,7 @@
 .actions{display:flex;gap:10px;align-items:flex-end;pointer-events:auto}.act{width:54px;height:54px;border-radius:50%;border:1px solid #d5f5dd66;background:#071c16bb;color:#effff5;font-size:10px;font-weight:800;backdrop-filter:blur(8px)}.act.primary{background:linear-gradient(145deg,#0c9866,#07563d);border-color:#baf05b88}.act.zoom{width:40px;height:40px;font-size:20px}
 #error{display:none;position:fixed;inset:0;place-items:center;text-align:center;padding:28px;background:#071c16;z-index:20;color:#effff5}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/babylonjs@7.54.3/babylon.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/babylonjs@7.54.3/babylon.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/babylonjs-loaders@7.54.3/babylonjs.loaders.min.js"></script>
 </head>
 <body>
 <canvas id="renderCanvas"></canvas>
@@ -55,37 +55,32 @@ const cSand=new BABYLON.Color3(.72,.63,.43),cGrass=new BABYLON.Color3(.27,.46,.2
 for(let iz=0;iz<=N;iz++)for(let ix=0;ix<=N;ix++){const x=(ix/N-.5)*SIZE,z=(iz/N-.5)*SIZE,y=heightAt(x,z);verts.push(x,y,z);let c;if(y<4)c=cSand;else if(y<45)c=BABYLON.Color3.Lerp(cGrass,cForest,clamp((y-4)/65,0,.75));else if(y<115)c=BABYLON.Color3.Lerp(cForest,cRock,(y-45)/70);else c=BABYLON.Color3.Lerp(cRock,cSnow,clamp((y-115)/45,0,1));const tint=.94+hash(ix,iz)*.12;cols.push(c.r*tint,c.g*tint,c.b*tint,1);if(ix<N&&iz<N){const a=iz*(N+1)+ix,b=a+1,d=a+N+1,e=d+1;inds.push(a,d,b,b,d,e)}}
 const terrain=new BABYLON.Mesh('islandTerrain_3D_ground',scene),vd=new BABYLON.VertexData();vd.positions=verts;vd.indices=inds;vd.colors=cols;vd.normals=[];BABYLON.VertexData.ComputeNormals(verts,inds,vd.normals);vd.applyToMesh(terrain,true);terrain.material=terrainMat;terrain.isPickable=false;terrain.isVisible=true;terrain.setEnabled(true);terrain.alwaysSelectAsActiveMesh=true;terrain.refreshBoundingInfo(true);
 function makeThin(meshName,geo,mat,matrices){const m=geo;m.name=meshName;m.material=mat;m.isPickable=false;m.isVisible=true;m.alwaysSelectAsActiveMesh=true;m.position.y=-100000;const data=new Float32Array(matrices);for(let i=0;i<data.length;i+=16)data[i+13]+=100000;if(data.length)m.thinInstanceSetBuffer('matrix',data,16,true);return m}
-// Natural broadleaf forest: tapered trunks, visible branches and irregular multi-lobed crowns.
-const trunkMat=new BABYLON.StandardMaterial('treeBark',scene);trunkMat.diffuseColor=new BABYLON.Color3(.34,.22,.13);trunkMat.specularColor=new BABYLON.Color3(.08,.06,.04);
-const branchMat=new BABYLON.StandardMaterial('branchBark',scene);branchMat.diffuseColor=new BABYLON.Color3(.38,.25,.14);branchMat.specularColor=new BABYLON.Color3(.05,.04,.03);
-const leafMat=new BABYLON.StandardMaterial('treeLeaves',scene);leafMat.diffuseColor=new BABYLON.Color3(.12,.31,.17);leafMat.specularColor=new BABYLON.Color3(.07,.11,.05);
-const leafLightMat=new BABYLON.StandardMaterial('treeLeavesSunlit',scene);leafLightMat.diffuseColor=new BABYLON.Color3(.19,.39,.21);leafLightMat.specularColor=new BABYLON.Color3(.06,.1,.04);
-const trunkGeo=BABYLON.MeshBuilder.CreateCylinder('taperedTreeTrunk',{height:7,diameterTop:.38,diameterBottom:1.05,tessellation:9},scene);trunkGeo.isVisible=false;
-const branchGeo=BABYLON.MeshBuilder.CreateCylinder('treeBranchGeometry',{height:4.1,diameterTop:.13,diameterBottom:.42,tessellation:7},scene);branchGeo.isVisible=false;
-const crownGeo=BABYLON.MeshBuilder.CreateIcoSphere('irregularLeafCrown',{radius:1,subdivisions:1},scene);crownGeo.isVisible=false;
-const trunkMatrices=[],branchMatrices=[],crownMatrices=[],sunlitCrownMatrices=[];
-function composeTree(x,y,z,sx,sy,sz,yaw,pitch=0,roll=0){return BABYLON.Matrix.Compose(new BABYLON.Vector3(sx,sy,sz),BABYLON.Quaternion.RotationYawPitchRoll(yaw,pitch,roll),new BABYLON.Vector3(x,y,z)).m}
-let treeCount=0,tries=0;
-while(treeCount<7800&&tries<78000){
- tries++;const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);
+// Real CC0 broadleaf rainforest tree model (GLB), loaded once and GPU-instanced across the island.
+const REAL_TREE_BASE='https://files.innerscene.com/library/broadleaf-rainforest-canopy-tree-25-m-b42c69c7/';
+const REAL_TREE_FILE='broadleaf-rainforest-canopy-tree-25-m.glb';
+const realTreeMatrices=[];
+let realTreeCount=0;
+for(let attempt=0;attempt<78000&&realTreeCount<7800;attempt++){
+ const x=(Math.random()-.5)*4400,z=(Math.random()-.5)*4400,y=heightAt(x,z);
  if(y<4||y>145||Math.hypot(x,z)>2220)continue;
- const sc=.72+Math.random()*.82,rot=Math.random()*Math.PI*2;
- trunkMatrices.push(...composeTree(x,y+3.5*sc,z,.48*sc,sc,.48*sc,rot));
- for(let b=0;b<2;b++){
-  const a=rot+b*Math.PI+(.25+Math.random()*.25),lean=.55+Math.random()*.22;
-  branchMatrices.push(...composeTree(x+Math.sin(a)*1.05*sc,y+(3.7+Math.random()*.65)*sc,z+Math.cos(a)*1.05*sc,.72*sc,.72*sc,.72*sc,a,Math.cos(a)*lean,-Math.sin(a)*lean));
- }
- const crownY=y+7.5*sc,spread=1.65*sc;
- crownMatrices.push(...composeTree(x,crownY,z,2.55*sc,3.05*sc,2.5*sc,rot));
- crownMatrices.push(...composeTree(x+Math.sin(rot)*spread,crownY-.35*sc,z+Math.cos(rot)*spread,1.95*sc,2.25*sc,1.95*sc,rot+.7));
- crownMatrices.push(...composeTree(x-Math.sin(rot)*spread*.85,crownY-.2*sc,z-Math.cos(rot)*spread*.85,1.9*sc,2.2*sc,1.9*sc,rot-.8));
- if(Math.random()<.42)sunlitCrownMatrices.push(...composeTree(x+Math.sin(rot+1.2)*spread*.55,crownY+.65*sc,z+Math.cos(rot+1.2)*spread*.55,1.45*sc,1.75*sc,1.45*sc,rot+1.2));
- treeCount++;
+ const scale=.55+Math.random()*.28,rot=Math.random()*Math.PI*2;
+ realTreeMatrices.push(...BABYLON.Matrix.Compose(new BABYLON.Vector3(scale,scale,scale),BABYLON.Quaternion.RotationYawPitchRoll(rot,0,0),new BABYLON.Vector3(x,y,z)).m);
+ realTreeCount++;
 }
-makeThin('7800_tapered_forest_trunks',trunkGeo,trunkMat,trunkMatrices);
-makeThin('15600_visible_tree_branches',branchGeo,branchMat,branchMatrices);
-makeThin('natural_multi_lobed_tree_canopies',crownGeo,leafMat,crownMatrices);
-makeThin('sunlit_leaf_clusters',crownGeo,leafLightMat,sunlitCrownMatrices);
+BABYLON.SceneLoader.ImportMeshAsync('',REAL_TREE_BASE,REAL_TREE_FILE,scene).then(result=>{
+ const sources=result.meshes.filter(m=>m instanceof BABYLON.Mesh&&m.getTotalVertices()>0);
+ if(!sources.length)throw new Error('GLB загружен, но в нём нет геометрии деревьев.');
+ for(const mesh of sources){
+  mesh.bakeCurrentTransformIntoVertices();
+  mesh.position.set(0,0,0);mesh.rotation.set(0,0,0);mesh.rotationQuaternion=null;mesh.scaling.set(1,1,1);
+  mesh.isVisible=true;mesh.isPickable=false;mesh.alwaysSelectAsActiveMesh=true;
+  mesh.thinInstanceSetBuffer('matrix',new Float32Array(realTreeMatrices),16,true);
+ }
+ console.info('SHOHIN ISLAND: real CC0 broadleaf trees instanced:',realTreeCount,'mesh parts:',sources.length);
+}).catch(err=>{
+ console.error('Real tree GLB load failed:',err);
+ const notice=document.getElementById('hint');if(notice)notice.textContent='Не удалось загрузить 3D-модели деревьев — проверь интернет';
+});
 const palmTrunkMat=new BABYLON.StandardMaterial('palmBark',scene);palmTrunkMat.diffuseColor=new BABYLON.Color3(.48,.34,.2);
 const palmLeafMat=new BABYLON.StandardMaterial('palmLeaf',scene);palmLeafMat.diffuseColor=new BABYLON.Color3(.12,.39,.22);palmLeafMat.backFaceCulling=false;
 const palmTrunkGeo=BABYLON.MeshBuilder.CreateCylinder('palmTrunkBase',{height:10,diameterTop:.4,diameterBottom:.95,tessellation:8},scene);palmTrunkGeo.isVisible=false;
