@@ -42,19 +42,20 @@ let engine,scene,camera,player,body,head,pack,overview=false,third=true,yaw=0,pi
 const move={x:0,y:0},keys={};
 try{
 if(!window.BABYLON)throw new Error('Babylon.js не загрузился. Проверь интернет и обнови страницу.');
-engine=new BABYLON.Engine(canvas,false,{preserveDrawingBuffer:false,stencil:false,antialias:false,powerPreference:'high-performance'},true);
-engine.setHardwareScalingLevel(Math.max(1.5,Math.min(2.25,window.devicePixelRatio/1.15)));
-scene=new BABYLON.Scene(engine);scene.clearColor=new BABYLON.Color4(.56,.79,.84,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogColor=new BABYLON.Color3(.62,.79,.80);scene.fogDensity=.000105;
+engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:false,antialias:true,powerPreference:'high-performance'},true);
+engine.setHardwareScalingLevel(1.0);
+scene=new BABYLON.Scene(engine);scene.imageProcessingConfiguration.toneMappingEnabled=true;scene.imageProcessingConfiguration.toneMappingType=BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;scene.imageProcessingConfiguration.exposure=1.15;scene.imageProcessingConfiguration.contrast=1.12;scene.clearColor=new BABYLON.Color4(.56,.79,.84,1);scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogColor=new BABYLON.Color3(.62,.79,.80);scene.fogDensity=.000105;
 const hemi=new BABYLON.HemisphericLight('skyLight',new BABYLON.Vector3(0,1,0),scene);hemi.intensity=1.05;hemi.diffuse=new BABYLON.Color3(.78,.9,1);hemi.groundColor=new BABYLON.Color3(.22,.31,.22);
 const sunDir=new BABYLON.Vector3(-.48,.34,-.81).normalize(),sun=new BABYLON.DirectionalLight('sun',sunDir.scale(-1),scene);sun.position=sunDir.scale(900);sun.intensity=2.1;sun.diffuse=new BABYLON.Color3(1,.9,.72);
+const shadowGenerator=new BABYLON.ShadowGenerator(2048,sun);shadowGenerator.usePercentageCloserFiltering=true;shadowGenerator.filteringQuality=BABYLON.ShadowGenerator.QUALITY_MEDIUM;shadowGenerator.bias=.0005;shadowGenerator.normalBias=.02;
 const sunBall=BABYLON.MeshBuilder.CreateSphere('sunDisk',{diameter:180,segments:24},scene);sunBall.position=sunDir.scale(4800);const sunMat=new BABYLON.StandardMaterial('sunMat',scene);sunMat.emissiveColor=new BABYLON.Color3(1,.88,.62);sunMat.disableLighting=true;sunBall.material=sunMat;
 camera=new BABYLON.UniversalCamera('gameCamera',new BABYLON.Vector3(0,18,18),scene);camera.minZ=.1;camera.maxZ=14000;camera.fov=1.08;camera.inputs.clear();scene.activeCamera=camera;
 const terrainMat=new BABYLON.StandardMaterial('terrainMat',scene);terrainMat.diffuseColor=BABYLON.Color3.White();terrainMat.ambientColor=new BABYLON.Color3(.38,.42,.34);terrainMat.specularColor=new BABYLON.Color3(.12,.15,.1);terrainMat.specularPower=48;terrainMat.useVertexColors=true;terrainMat.backFaceCulling=false;terrainMat.disableLighting=false;
 const N=240,SIZE=5000,verts=[],inds=[],cols=[];
 const cSand=new BABYLON.Color3(.72,.63,.43),cGrass=new BABYLON.Color3(.27,.46,.27),cForest=new BABYLON.Color3(.12,.29,.19),cRock=new BABYLON.Color3(.43,.45,.42),cSnow=new BABYLON.Color3(.82,.86,.82);
 for(let iz=0;iz<=N;iz++)for(let ix=0;ix<=N;ix++){const x=(ix/N-.5)*SIZE,z=(iz/N-.5)*SIZE,y=heightAt(x,z);verts.push(x,y,z);let c;if(y<4)c=cSand;else if(y<45)c=BABYLON.Color3.Lerp(cGrass,cForest,clamp((y-4)/65,0,.75));else if(y<115)c=BABYLON.Color3.Lerp(cForest,cRock,(y-45)/70);else c=BABYLON.Color3.Lerp(cRock,cSnow,clamp((y-115)/45,0,1));const tint=.94+hash(ix,iz)*.12;cols.push(c.r*tint,c.g*tint,c.b*tint,1);if(ix<N&&iz<N){const a=iz*(N+1)+ix,b=a+1,d=a+N+1,e=d+1;inds.push(a,d,b,b,d,e)}}
-const terrain=new BABYLON.Mesh('islandTerrain_3D_ground',scene),vd=new BABYLON.VertexData();vd.positions=verts;vd.indices=inds;vd.colors=cols;vd.normals=[];BABYLON.VertexData.ComputeNormals(verts,inds,vd.normals);vd.applyToMesh(terrain,true);terrain.material=terrainMat;terrain.isPickable=false;terrain.isVisible=true;terrain.setEnabled(true);terrain.alwaysSelectAsActiveMesh=true;terrain.refreshBoundingInfo(true);
-function makeThin(meshName,geo,mat,matrices){const m=geo;m.name=meshName;m.material=mat;m.isPickable=false;m.isVisible=true;m.alwaysSelectAsActiveMesh=true;m.position.y=-100000;const data=new Float32Array(matrices);for(let i=0;i<data.length;i+=16)data[i+13]+=100000;if(data.length)m.thinInstanceSetBuffer('matrix',data,16,true);return m}
+const terrain=new BABYLON.Mesh('islandTerrain_3D_ground',scene),vd=new BABYLON.VertexData();vd.positions=verts;vd.indices=inds;vd.colors=cols;vd.normals=[];BABYLON.VertexData.ComputeNormals(verts,inds,vd.normals);vd.applyToMesh(terrain,true);terrain.material=terrainMat;terrain.receiveShadows=true;terrain.isPickable=false;terrain.isVisible=true;terrain.setEnabled(true);terrain.alwaysSelectAsActiveMesh=true;terrain.refreshBoundingInfo(true);
+function makeThin(meshName,geo,mat,matrices){const m=geo;m.name=meshName;m.material=mat;m.isPickable=false;m.isVisible=true;m.alwaysSelectAsActiveMesh=true;if(meshName==='palm_trunks'||meshName==='island_rocks')shadowGenerator.addShadowCaster(m,true);m.position.y=-100000;const data=new Float32Array(matrices);for(let i=0;i<data.length;i+=16)data[i+13]+=100000;if(data.length)m.thinInstanceSetBuffer('matrix',data,16,true);return m}
 // Real CC0 broadleaf rainforest tree model (GLB), loaded once and GPU-instanced across the island.
 const REAL_TREE_BASE='https://files.innerscene.com/library/broadleaf-rainforest-canopy-tree-25-m-b42c69c8/9f8f65c7bb3169c1bf76/';
 const REAL_TREE_FILE='broadleaf-rainforest-canopy-tree-25-m.glb';
@@ -73,7 +74,7 @@ BABYLON.SceneLoader.ImportMeshAsync('',REAL_TREE_BASE,REAL_TREE_FILE,scene).then
  for(const mesh of sources){
   mesh.bakeCurrentTransformIntoVertices();
   mesh.position.set(0,0,0);mesh.rotation.set(0,0,0);mesh.rotationQuaternion=null;mesh.scaling.set(1,1,1);
-  mesh.isVisible=true;mesh.isPickable=false;mesh.alwaysSelectAsActiveMesh=true;
+  mesh.isVisible=true;mesh.isPickable=false;mesh.alwaysSelectAsActiveMesh=true;shadowGenerator.addShadowCaster(mesh,true);
   mesh.thinInstanceSetBuffer('matrix',new Float32Array(realTreeMatrices),16,true);
  }
  console.info('SHOHIN ISLAND: real CC0 broadleaf trees instanced:',realTreeCount,'mesh parts:',sources.length);
