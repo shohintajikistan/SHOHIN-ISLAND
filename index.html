@@ -182,6 +182,11 @@ loadIslandAsset('https://cdn.3dassets.dev/assets/6837/v1/model.glb',[
 loadIslandAsset('https://cdn.3dassets.dev/assets/6801/v1/model.glb',[
  {x:-1710,z:-520,scale:1.0},{x:1690,z:700,scale:1.1}
 ]);
+// Natural shoreline cove asset: sand-to-water transition, broken foam, dune grass, boardwalk, shells and coastal rocks.
+// Source: 3DAssets.dev / Beach Surf and Paddle Kit — Surf Cove Base (CC0, 15,752 triangles).
+loadIslandAsset('https://cdn.3dassets.dev/assets/39464/v1/model.glb',[
+ {x:1840,z:0,scale:5.6,lift:.35,rotation:Math.PI*.18}
+]);
 // scattered boulders
 const rockGeo=new THREE.DodecahedronGeometry(2.5,0),rockMat=new THREE.MeshStandardMaterial({color:0x777a73,roughness:1});const rocks=new THREE.InstancedMesh(rockGeo,rockMat,900);let rc=0;
 for(let i=0;i<900;i++){const x=(Math.random()-.5)*4200,z=(Math.random()-.5)*4200,y=heightAt(x,z);if(y<3)continue;dummy.position.set(x,y+1,z);dummy.rotation.set(Math.random(),Math.random()*6,Math.random());const s=.4+Math.random()*2.4;dummy.scale.set(s,s*.6,s);dummy.updateMatrix();rocks.setMatrixAt(rc++,dummy.matrix)}rocks.count=rc;rocks.castShadow=true;scene.add(rocks);
