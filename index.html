@@ -108,7 +108,31 @@ function makeGroundMaps(){
  x.putImageData(im,0,0);const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(32,32);tex.colorSpace=THREE.NoColorSpace;return tex;
 }
 const groundBump=makeGroundMaps();
-const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.98,bumpMap:groundBump,bumpScale:1.35});
+// Wet-clay surface: mottled roughness with irregular smooth patches that catch the tropical sunlight.
+function makeWetClayRoughness(){
+ const c=document.createElement('canvas');c.width=c.height=512;
+ const ctx=c.getContext('2d'),im=ctx.createImageData(512,512);
+ for(let y=0;y<512;y++)for(let x=0;x<512;x++){
+  const i=(y*512+x)*4;
+  const broad=Math.sin(x*.026+Math.sin(y*.018)*2.4)*Math.cos(y*.031-x*.009);
+  const medium=Math.sin(x*.11+y*.047)*.5+Math.cos(y*.095-x*.063)*.35;
+  const fine=(Math.random()-.5)*.24;
+  const wet=Math.max(0,Math.sin(x*.014+Math.cos(y*.012)*2.1)*Math.cos(y*.019-x*.008));
+  const value=THREE.MathUtils.clamp(154+broad*30+medium*22+fine*75-wet*72,48,225);
+  im.data[i]=im.data[i+1]=im.data[i+2]=value;im.data[i+3]=255;
+ }
+ ctx.putImageData(im,0,0);
+ // Fine irregular dry ridges between the smoother, wetter clay patches.
+ ctx.globalAlpha=.16;ctx.strokeStyle='#eeeeee';ctx.lineWidth=1;
+ for(let n=0;n<85;n++){
+  let x=Math.random()*512,y=Math.random()*512;ctx.beginPath();ctx.moveTo(x,y);
+  for(let k=0;k<4;k++){x+=(Math.random()-.5)*22;y+=Math.random()*13;ctx.lineTo(x,y)}
+  ctx.stroke();
+ }
+ const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(24,24);tex.colorSpace=THREE.NoColorSpace;return tex;
+}
+const wetClayRoughness=makeWetClayRoughness();
+const terrainMat=new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.46,roughnessMap:wetClayRoughness,clearcoat:.62,clearcoatRoughness:.24,bumpMap:groundBump,bumpScale:1.2});
 const terrain=new THREE.Mesh(terrainGeo,terrainMat);terrain.receiveShadow=true;terrain.castShadow=true;scene.add(terrain);
 // Ultra-dense island grass: 560,000 lightweight instanced blades, without per-blade shadows.
 const grassGeo=new THREE.PlaneGeometry(.24,1.25,1,1);
