@@ -56,7 +56,7 @@ for(let iz=0;iz<=N;iz++)for(let ix=0;ix<=N;ix++){const x=(ix/N-.5)*SIZE,z=(iz/N-
 const terrain=new BABYLON.Mesh('islandTerrain_3D_ground',scene),vd=new BABYLON.VertexData();vd.positions=verts;vd.indices=inds;vd.colors=cols;vd.normals=[];BABYLON.VertexData.ComputeNormals(verts,inds,vd.normals);vd.applyToMesh(terrain,true);terrain.material=terrainMat;terrain.isPickable=false;terrain.isVisible=true;terrain.setEnabled(true);terrain.alwaysSelectAsActiveMesh=true;terrain.refreshBoundingInfo(true);
 function makeThin(meshName,geo,mat,matrices){const m=geo;m.name=meshName;m.material=mat;m.isPickable=false;m.isVisible=true;m.alwaysSelectAsActiveMesh=true;m.position.y=-100000;const data=new Float32Array(matrices);for(let i=0;i<data.length;i+=16)data[i+13]+=100000;if(data.length)m.thinInstanceSetBuffer('matrix',data,16,true);return m}
 // Real CC0 broadleaf rainforest tree model (GLB), loaded once and GPU-instanced across the island.
-const REAL_TREE_BASE='https://files.innerscene.com/library/broadleaf-rainforest-canopy-tree-25-m-b42c69c7/';
+const REAL_TREE_BASE='https://files.innerscene.com/library/broadleaf-rainforest-canopy-tree-25-m-b42c69c8/';
 const REAL_TREE_FILE='broadleaf-rainforest-canopy-tree-25-m.glb';
 const realTreeMatrices=[];
 let realTreeCount=0;
